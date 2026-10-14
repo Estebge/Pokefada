@@ -1,0 +1,67 @@
+name: Pokéfada monitor
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "test = récap sur Discord sans toucher à l'état ; normal = passage réel"
+        type: choice
+        options: [test, normal]
+        default: test
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pokefada
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Surveiller les produits
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MODE: ${{ github.event.inputs.mode || 'normal' }}
+        run: |
+          if [ "$MODE" = "test" ]; then
+            python monitor.py --test
+          else
+            python monitor.py
+          fi
+
+      - name: Sauvegarder l'état
+        if: ${{ github.event.inputs.mode != 'test' }}
+        run: |
+          git config user.name "pokefada-bot"
+          git config user.email "pokefada-bot@users.noreply.github.com"
+          if ! git diff --quiet -- etat.json; then
+            git add etat.json
+            git commit -m "chore: état du moniteur"
+            git pull --rebase -q || true
+            git push
+          fi
+
+      - name: Keepalive (évite la désactivation après 60 jours sans activité)
+        run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          if [ $((now - last)) -gt $((45 * 86400)) ]; then
+            git config user.name "pokefada-bot"
+            git config user.email "pokefada-bot@users.noreply.github.com"
+            git commit --allow-empty -m "chore: keepalive"
+            git push
+          fi
