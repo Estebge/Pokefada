@@ -2,22 +2,22 @@
   "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-30eme-anniversaire/p/261821": {
     "alerted": false,
     "price": null,
-    "problem_notified": false,
-    "problems": 2,
+    "problem_notified": true,
+    "problems": 3,
     "status": null
   },
   "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-me04-mega-evolution-chaos-ascendant/p/260763": {
     "alerted": false,
     "price": null,
-    "problem_notified": false,
-    "problems": 2,
+    "problem_notified": true,
+    "problems": 3,
     "status": null
   },
   "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-mega-evolution-nuit-noire-me05-bundle-6-boosters/p/260783": {
     "alerted": false,
     "price": null,
-    "problem_notified": false,
-    "problems": 2,
+    "problem_notified": true,
+    "problems": 3,
     "status": null
   }
 }
