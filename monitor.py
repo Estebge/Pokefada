@@ -67,10 +67,22 @@ IN_MARKERS = [
     "ajouter au panier", "ajouter à mon panier", "add to basket", "add to cart",
     "acheter maintenant",
 ]
-BLOCK_MARKERS = [
-    "captcha", "access denied", "just a moment", "robot check", "are you a human",
-    "accès refusé", "verify you are human", "cf-chl",
-]
+# Pages "prouvez que vous êtes humain". Le simple mot "captcha" ne suffit pas : beaucoup de
+# vraies pages chargent un reCAPTCHA (newsletter, formulaire), ce qui donnait de faux blocages.
+CHALLENGE_TITLES = ("just a moment", "attention required", "access denied", "accès refusé",
+                    "un instant", "robot check", "are you a human", "pardon our interruption")
+CHALLENGE_MARKERS = ("captcha-delivery.com", "cf-chl-widget", "challenges.cloudflare.com/turnstile",
+                     "px-captcha", "verify you are human", "vérifiez que vous êtes humain")
+
+
+def looks_like_challenge(html):
+    """Vrai si la page est un écran anti-robot (et pas une vraie page qui contient un captcha)."""
+    title = re.search(r"<title[^>]*>(.*?)</title>", html[:20000], re.I | re.S)
+    t = unescape(title.group(1)).strip().lower() if title else ""
+    if any(t.startswith(x) for x in CHALLENGE_TITLES):
+        return True
+    low = html[:60000].lower()
+    return len(html) < 150_000 and any(k in low for k in CHALLENGE_MARKERS)
 DIAG_WORDS = ["panier", "stock", "disponible", "indisponible", "précommande",
               "bientôt", "épuisé", "javascript", "captcha", "cookies"]
 
@@ -363,7 +375,7 @@ def analyse(html, offer):
     if any(k in text for k in IN_MARKERS):
         return "in_stock", None, "texte"
 
-    if any(k in text or k in html.lower() for k in BLOCK_MARKERS):
+    if looks_like_challenge(html):
         return "blocked", None, "page anti-robot"
     return "unknown", None, "rien de lisible"
 
@@ -565,8 +577,7 @@ def is_blocked(r):
         return "pas de réponse"
     if r.status_code in (401, 403, 429, 503):
         return f"HTTP {r.status_code}"
-    low = r.text[:20000].lower()
-    if any(k in low for k in ("just a moment", "captcha", "cf-chl", "access denied")):
+    if looks_like_challenge(r.text):
         return "page anti-robot"
     return None
 
@@ -580,8 +591,8 @@ def probe_store(store, session):
         blocked = is_blocked(r)
         if blocked:
             last = f"recherche bloquée ({blocked})"
-            if r is not None and r.status_code in (403, 429):
-                break  # inutile d'insister : le site refuse le script
+            if r is not None and r.status_code == 429:
+                break  # le site demande de ralentir : on n'insiste pas
             continue
         if r.status_code >= 400:
             continue
