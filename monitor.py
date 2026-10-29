@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Pokéfada : surveille des fiches produit et prévient sur Discord au réassort.
 
+Pour chaque produit et chaque magasin, le script retrouve tout seul la fiche produit grâce
+à la recherche du site (code-barres puis nom), vérifie que c'est le bon produit, garde
+l'adresse, et la recherche de nouveau si elle change.
+
 Usage :
     python monitor.py            passage normal (alertes + mise à jour de etat.json)
-    python monitor.py --test     récap sur Discord de ce que le script lit sur chaque page
-                                 (offres "actif" ET "test"), sans toucher à etat.json
+    python monitor.py --test     récap sur Discord de ce que le script lit pour chaque produit
+                                 et chaque magasin, sans toucher à etat.json
     python monitor.py --dry-run  comme un passage normal, mais n'envoie rien et n'écrit rien
 
 L'URL du webhook Discord se lit dans la variable d'environnement DISCORD_WEBHOOK_URL
@@ -17,11 +21,12 @@ import random
 import re
 import sys
 import time
+import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from html import unescape
 from pathlib import Path
-from urllib.parse import parse_qsl, unquote, urljoin, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote_plus, unquote, urljoin, urlsplit, urlunsplit
 
 import requests
 
@@ -47,7 +52,7 @@ MERCHANT_DOMAINS = [
 ]
 
 IN_STATUSES = {"in_stock", "preorder"}
-PROBLEM_STATUSES = {"blocked", "error", "unknown", "lien", "liste"}
+PROBLEM_STATUSES = {"blocked", "error", "unknown", "lien", "liste", "autre"}
 # seules ces lectures déclenchent une alerte (sauf "trust_text": true dans l'offre)
 RELIABLE_SOURCES = {"json-ld", "meta", "regex"}
 LISTING_TITLE = re.compile(r"r[ée]sultat|recherche|vente termin|cat[ée]gorie", re.I)
@@ -80,13 +85,17 @@ PROBLEM_LABEL = {
     "unknown": "stock illisible",
     "lien": "lien non résolu",
     "liste": "pas une fiche produit",
+    "autre": "page changée",
 }
 STATUS_LABEL = {
     "in_stock": "en stock", "preorder": "précommande", "out_of_stock": "rupture",
+    "absent": "pas trouvé dans ce magasin", "attente": "recherche au prochain passage",
+    "recherche": "recherche du site illisible",
     **PROBLEM_LABEL,
 }
 ICONS = {"in_stock": "🟢", "preorder": "🟡", "out_of_stock": "🔴",
-         "blocked": "⛔", "error": "⛔", "unknown": "❓", "lien": "🔗", "liste": "📋"}
+         "blocked": "⛔", "error": "⛔", "unknown": "❓", "lien": "🔗", "liste": "📋", "autre": "📋",
+         "absent": "⚪", "attente": "⏳", "recherche": "❔"}
 
 
 # ================================================================ liens
@@ -407,39 +416,318 @@ def listing_reason(r):
         return "plusieurs produits sur la page"
     return None
 
+# ================================================================ reconnaître le bon produit
 
-def check_page(url, offer, session):
+def norm(text):
+    """Minuscules, sans accents ni ponctuation, entouré d'espaces : ' coffret dresseur elite '."""
+    text = unicodedata.normalize("NFKD", unescape(text or "")).encode("ascii", "ignore").decode()
+    return " " + re.sub(r"[^a-z0-9]+", " ", text.lower()).strip() + " "
+
+
+def has_term(text, term):
+    """`term` est un mot/une expression, ou une liste d'alternatives (une seule suffit)."""
+    terms = term if isinstance(term, list) else [term]
+    return any(norm(t) in text for t in terms)
+
+
+def name_matches(product, text):
+    text = norm(text)
+    return (all(has_term(text, t) for t in product.get("must", []))
+            and not any(has_term(text, t) for t in product.get("exclude", [])))
+
+
+def ean_in(text, ean):
+    digits = (ean or "").lstrip("0")
+    return bool(digits) and re.search(rf"(?<!\d)0*{digits}(?!\d)", text) is not None
+
+
+def page_product_name(html):
+    """Nom du produit de la fiche : JSON-LD, sinon <h1>, sinon <title>."""
+    names = []
+    for m in LD_RE.finditer(html):
+        try:
+            data = json.loads(m.group(1).strip())
+        except ValueError:
+            continue
+        nodes = data if isinstance(data, list) else data.get("@graph", [data]) if isinstance(data, dict) else []
+        for node in nodes:
+            if isinstance(node, dict) and "Product" in str(node.get("@type")) and node.get("name"):
+                names.append(str(node["name"]))
+    if len(names) == 1:
+        return names[0]
+    for tag in ("h1", "title"):
+        m = re.search(rf"<{tag}[^>]*>(.*?)</{tag}>", html, re.I | re.S)
+        if m:
+            return re.sub(r"<[^>]+>", " ", m.group(1))
+    return ""
+
+
+def verify(product, html):
+    """La page est-elle bien la fiche de ce produit ? Retourne la preuve ou None."""
+    if product.get("ean") and ean_in(html, product["ean"]):
+        return "code-barres"
+    if product.get("must") and name_matches(product, page_product_name(html)):
+        return "nom du produit"
+    return None
+
+
+# ================================================================ recherche dans les magasins
+
+A_RE = re.compile(r"<a\b([^>]*?)href=[\"']([^\"'#]+)[\"']([^>]*)>(.*?)</a>", re.S | re.I)
+NOT_PRODUCT_SEGMENTS = {"panier", "cart", "basket", "compte", "account", "login", "connexion", "wishlist",
+                        "favoris", "magasin", "magasins", "c", "categorie", "categories", "aide",
+                        "contact", "cgv", "mentions-legales"}
+
+
+def not_product_path(path):
+    """Adresses qui ne sont sûrement pas des fiches (panier, compte, recherche, catégorie...)."""
+    if re.search(r"recherche|search|resultat", path, re.I):
+        return True
+    segments = [seg.split(".")[0].lower() for seg in path.split("/") if seg]
+    return any(seg in NOT_PRODUCT_SEGMENTS for seg in segments)
+DEFAULT_TEMPLATES = ["/recherche?q={q}", "/search?q={q}", "/recherche?controller=search&s={q}",
+                     "/catalogsearch/result/?q={q}"]
+PROBE_QUERY = "pokemon"
+PROBE_TTL = 7 * 24 * 3600        # le format de recherche d'un magasin est revérifié chaque semaine
+PROBE_RETRY = 24 * 3600          # un magasin dont la recherche est illisible est retenté chaque jour
+SEARCH_RETRY = 6 * 3600          # un produit introuvable est recherché de nouveau toutes les 6 h
+SEARCH_BUDGET = {"normal": 3, "test": 99}   # recherches de produits par magasin et par passage
+
+
+def same_site(url, domain):
+    h = host_of(url)
+    return h == domain or h.endswith("." + domain)
+
+
+def store_templates(store):
+    base = f"https://www.{store['domain']}"
+    out = list(store.get("search", []))
+    for t in DEFAULT_TEMPLATES:
+        full = base + t
+        if full not in out:
+            out.append(full)
+    return out
+
+
+def result_links(html, base_url, domain):
+    """Liens vers des pages du magasin trouvés dans une page de résultats : {url: texte}."""
+    links = {}
+    for before, href, after, inner in A_RE.findall(html):
+        url = urljoin(base_url, unescape(href.strip()))
+        if not url.startswith("http") or not same_site(url, domain):
+            continue
+        if not_product_path(urlsplit(url).path):
+            continue
+        alts = " ".join(re.findall(r'(?:alt|title|aria-label)=["\']([^"\']*)["\']', before + after + inner))
+        text = re.sub(r"<[^>]+>", " ", inner) + " " + alts
+        key = url.split("#")[0]
+        links[key] = links.get(key, "") + " " + text
+    # adresses écrites dans du JSON (pages construites en JavaScript)
+    flat = html.replace("\\/", "/")
+    for url in re.findall(rf"https?://(?:[\w-]+\.)*{re.escape(domain)}/[^\"'\s<>\\]+", flat):
+        if not not_product_path(urlsplit(url).path):
+            links.setdefault(url, "")
+    return links
+
+
+def rank_candidates(product, links):
+    """Garde les liens qui ressemblent au produit (mots-clés dans l'adresse ou le texte)."""
+    scored = []
+    for url, text in links.items():
+        hay = norm(unquote(urlsplit(url).path) + " " + text)
+        score = 0
+        if product.get("ean") and ean_in(url + " " + text, product["ean"]):
+            score += 10
+        must = product.get("must", [])
+        hits = sum(1 for t in must if has_term(hay, t))
+        score += 2 * hits
+        if any(has_term(hay, t) for t in product.get("exclude", [])):
+            score -= 5
+        if score >= 10 or (must and hits == len(must) and score > 0):
+            scored.append((score, url))
+    scored.sort(key=lambda x: -x[0])
+    return [u for _, u in scored[:3]]
+
+
+def fetch(session, url):
     try:
-        r = session.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
-    except requests.RequestException as e:
-        return {"status": "error", "price": None, "source": type(e).__name__, "diag": None}
+        return session.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
+    except requests.RequestException:
+        return None
+
+
+def pause():
+    time.sleep(random.uniform(2, 4))
+
+
+def is_blocked(r):
+    if r is None:
+        return "pas de réponse"
+    if r.status_code in (401, 403, 429, 503):
+        return f"HTTP {r.status_code}"
+    low = r.text[:20000].lower()
+    if any(k in low for k in ("just a moment", "captcha", "cf-chl", "access denied")):
+        return "page anti-robot"
+    return None
+
+
+def probe_store(store, session):
+    """Trouve le format d'adresse de recherche du magasin. Retourne (modèle, diagnostic)."""
+    last = "aucun format de recherche ne donne de résultats lisibles"
+    for template in store_templates(store):
+        r = fetch(session, template.format(q=quote_plus(PROBE_QUERY)))
+        pause()
+        blocked = is_blocked(r)
+        if blocked:
+            last = f"recherche bloquée ({blocked})"
+            if r is not None and r.status_code in (403, 429):
+                break  # inutile d'insister : le site refuse le script
+            continue
+        if r.status_code >= 400:
+            continue
+        links = result_links(r.text, r.url, store["domain"])
+        n = sum(1 for u, t in links.items() if " pokemon " in norm(unquote(urlsplit(u).path) + " " + t))
+        if n >= 3:
+            return template, f"recherche OK ({n} liens Pokémon)"
+        last = f"page de recherche sans liens produit lisibles ({diagnose(r)['court']})"
+    return None, last
+
+
+def search_product(product, store, template, session):
+    """Cherche la fiche du produit. Retourne (url, réponse, preuve) ou (None, None, raison)."""
+    queries = ([product["ean"]] if product.get("ean") else []) + [product["query"]]
+    seen = set()
+    for q in queries:
+        r = fetch(session, template.format(q=quote_plus(q)))
+        pause()
+        blocked = is_blocked(r)
+        if blocked:
+            return None, None, f"recherche bloquée ({blocked})"
+        if r.status_code >= 400:
+            continue
+        # certains sites ouvrent directement la fiche quand un seul produit correspond
+        if not listing_reason(r):
+            proof = verify(product, r.text)
+            if proof:
+                return clean_url(r.url) or r.url, r, proof
+        for url in rank_candidates(product, result_links(r.text, r.url, store["domain"])):
+            if url in seen:
+                continue
+            seen.add(url)
+            rr = fetch(session, url)
+            pause()
+            if rr is None or rr.status_code != 200 or listing_reason(rr):
+                continue
+            proof = verify(product, rr.text)
+            if proof:
+                return clean_url(rr.url) or rr.url, rr, proof
+    return None, None, "pas trouvé dans ce magasin"
+
+
+# ================================================================ lecture d'une fiche
+
+def evaluate(r, product, offer):
+    """Transforme la réponse d'une fiche en résultat (statut, prix, source...)."""
+    if r is None:
+        return {"status": "error", "price": None, "source": "pas de réponse", "diag": None}
     diag = diagnose(r)
     if r.status_code in (401, 403, 429, 503):
         return {"status": "blocked", "price": None, "source": f"HTTP {r.status_code}", "diag": diag}
-    if r.status_code == 404:
-        return {"status": "error", "price": None, "source": "HTTP 404 (lien mort ?)", "diag": diag}
+    if r.status_code in (404, 410):
+        return {"status": "error", "price": None, "source": f"HTTP {r.status_code} (page supprimée)",
+                "diag": diag, "gone": True}
     if r.status_code >= 400:
         return {"status": "error", "price": None, "source": f"HTTP {r.status_code}", "diag": diag}
     reason = listing_reason(r)
     if reason and not offer.get("allow_listing"):
-        return {"status": "liste", "price": None, "source": reason, "diag": diag}
+        return {"status": "liste", "price": None, "source": reason, "diag": diag, "gone": True}
+    proof = verify(product, r.text)
+    if not proof and offer.get("auto"):
+        return {"status": "autre", "price": None, "source": "la page ne montre plus ce produit",
+                "diag": diag, "gone": True}
     status, price, source = analyse(r.text, offer)
-    return {"status": status, "price": price, "source": source, "diag": diag}
+    if status == "blocked":
+        return {"status": "blocked", "price": None, "source": source, "diag": diag}
+    return {"status": status, "price": price, "source": source, "diag": diag, "verified": bool(proof)}
 
 
-def check_group(items):
-    """Vérifie les pages d'un même magasin une par une, avec une pause entre chaque."""
+def check_store(job):
+    """Tout le travail d'un magasin (pages connues, puis recherches), une requête à la fois."""
+    store, pairs, state, mode = job
     session = requests.Session()
-    out = {}
-    for i, (oid, offer, url) in enumerate(items):
-        if i:
-            time.sleep(random.uniform(2, 5))
-        res = check_page(url, offer, session)
-        res["url"] = url
-        out[oid] = res
-    return out
+    now = int(time.time())
+    out, notes = {}, []
+    fiches = state["fiches"]
+    tries = state["recherches"]
+    engines = state["moteurs"]
+    to_search = []
 
+    # 1. pages déjà connues : liens fixes de products.json, puis fiches trouvées par recherche
+    for pid, product, offer in pairs:
+        url = None if offer.get("auto") else offer_url(offer, state)
+        if not offer.get("auto") and not url:
+            err = state["liens"].get(offer.get("link") or "", {}).get("err") or "aucun lien"
+            out[pid] = {"status": "lien", "price": None, "source": err, "diag": None,
+                        "url": offer.get("link"), "via": "lien"}
+            continue
+        if offer.get("auto"):
+            url = (fiches.get(pid) or {}).get("url")
+            if not url:
+                to_search.append((pid, product, offer))
+                continue
+        res = evaluate(fetch(session, url), product, offer)
+        pause()
+        res.update(url=url, via="recherche" if offer.get("auto") else "lien")
+        if offer.get("auto") and res.get("gone"):
+            fiches.pop(pid, None)          # la fiche a changé : on la recherchera
+            tries.pop(pid, None)
+            to_search.append((pid, product, offer))
+        out[pid] = res
 
+    if not to_search:
+        return out, notes
+
+    # 2. format de recherche du magasin
+    eng = engines.get(store["name"]) or {}
+    age = now - eng.get("ts", 0)
+    if not eng or (eng.get("template") and age > PROBE_TTL) or (not eng.get("template") and age > PROBE_RETRY):
+        template, diag = probe_store(store, session)
+        eng = {"template": template, "ts": now, "diag": diag}
+        engines[store["name"]] = eng
+    notes.append(eng.get("diag", ""))
+    template = eng.get("template")
+
+    # 3. recherche des produits sans fiche
+    budget = SEARCH_BUDGET[mode]
+    for pid, product, offer in to_search:
+        if pid in out and out[pid]["status"] not in ("liste", "autre", "error"):
+            continue
+        if not template:
+            out[pid] = {"status": "recherche", "price": None, "source": eng.get("diag", ""),
+                        "diag": None, "url": None, "via": "recherche"}
+            continue
+        last = tries.get(pid, 0)
+        if mode == "normal" and now - last < SEARCH_RETRY:
+            out.setdefault(pid, {"status": "absent", "price": None, "source": "pas trouvé dans ce magasin",
+                                 "diag": None, "url": None, "via": "recherche"})
+            continue
+        if budget <= 0:
+            out.setdefault(pid, {"status": "attente", "price": None, "source": "recherche au prochain passage",
+                                 "diag": None, "url": None, "via": "recherche"})
+            continue
+        budget -= 1
+        tries[pid] = now
+        url, r, proof = search_product(product, store, template, session)
+        if not url:
+            status = "blocked" if proof.startswith("recherche bloquée") else "absent"
+            out[pid] = {"status": status, "price": None, "source": proof, "diag": None,
+                        "url": None, "via": "recherche"}
+            continue
+        fiches[pid] = {"url": url, "ts": now, "preuve": proof}
+        res = evaluate(r, product, offer)
+        res.update(url=url, via=f"recherche ({proof})", new=True)
+        out[pid] = res
+    return out, notes
 # ================================================================ Discord
 
 def send_discord(webhook, content):
@@ -502,55 +790,94 @@ def save_state(state):
         STATE_FILE.write_text(text, encoding="utf-8")
 
 
-def load_products():
+
+# ================================================================ configuration
+
+def load_config():
     cfg = load_json(PRODUCTS_FILE, None)
-    products = cfg.get("products") if isinstance(cfg, dict) else None
-    if not products:
+    if not isinstance(cfg, dict) or not cfg.get("products") or not cfg.get("stores"):
         return None
-    ids = [p["id"] for p in products]
-    if len(ids) != len(set(ids)):
-        raise SystemExit("products.json : deux produits ont le même id.")
-    return products
+    for key, items in (("id", cfg["products"]), ("name", cfg["stores"])):
+        values = [i[key] for i in items]
+        if len(values) != len(set(values)):
+            raise SystemExit(f"products.json : deux éléments ont le même {key}.")
+    return cfg
 
 
-def offer_id(product, offer):
-    return f"{product['id']}|{offer['store']}"
+def build_jobs(cfg, test):
+    """Associe chaque produit à chaque magasin. Retourne ({magasin: [(pid, produit, offre)]}, lignes)."""
+    def wanted(status):
+        return status == "actif" or (status == "test" and test)
+
+    jobs, rows, stores = defaultdict(list), [], {}
+    for s in cfg["stores"]:
+        stores[s["name"]] = s
+    for p in cfg["products"]:
+        explicit = {o["store"]: o for o in p.get("offers", [])}
+        for s in cfg["stores"]:
+            o = explicit.pop(s["name"], None)
+            store_status = s.get("status", "actif")
+            status = o.get("status", store_status) if o else store_status
+            if not wanted(status):
+                continue
+            offer = o or {"store": s["name"], "auto": True}
+            pid = f"{p['id']}|{s['name']}"
+            jobs[s["name"]].append((pid, p, offer))
+            rows.append((p, s["name"], pid, offer))
+        for name, o in explicit.items():      # lien fixe vers une boutique hors de la liste
+            if not wanted(o.get("status", "actif")):
+                continue
+            stores.setdefault(name, {"name": name, "domain": host_of(o.get("url") or "")})
+            pid = f"{p['id']}|{name}"
+            jobs[name].append((pid, p, o))
+            rows.append((p, name, pid, o))
+    return jobs, rows, stores
 
 
 # ================================================================ exécution
 
-def write_github_summary(products, offers, results):
+def is_reliable(res, offer):
+    if res["source"] in RELIABLE_SOURCES or offer.get("trust_text"):
+        return True
+    # sur une fiche dont on a vérifié l'identité, la lecture du texte devient crédible
+    return bool(res.get("verified")) and res["source"] in ("texte", "motif brut")
+
+
+def describe(res):
+    if res["status"] in ("in_stock", "preorder", "out_of_stock"):
+        text = f"{fmt_price(res['price'])} (lu via {res['source']})"
+    else:
+        text = no_ping(res["source"])
+    if str(res.get("via", "")).startswith("recherche") and res.get("url"):
+        text += " — fiche trouvée par recherche"
+    return text
+
+
+def write_github_summary(rows, results):
     path = os.environ.get("GITHUB_STEP_SUMMARY")
     if not path:
         return
     lines = ["# Pokéfada : détail du passage", ""]
-    by_product = defaultdict(list)
-    for p, o in offers:
-        by_product[p["id"]].append(o)
-    for p in products:
-        if p["id"] not in by_product:
-            continue
-        lines += [f"## {p['name']}", "",
-                  "| Magasin | Statut | Prix | Lu via | Page | Diagnostic |",
-                  "|---|---|---|---|---|---|"]
-        for o in by_product[p["id"]]:
-            r = results[offer_id(p, o)]
-            diag = r.get("diag") or {}
-            cell = (diag.get("court", "") + " — " + diag.get("texte", "")[:120]).strip(" —")
-            cell = cell.replace("|", "/")
-            page = r.get("url") or ""
-            lines.append(f"| {o['store']} ({o.get('status', 'actif')}) | "
-                         f"{STATUS_LABEL.get(r['status'], r['status'])} | {fmt_price(r['price'])} | "
-                         f"{r['source']} | {page} | {cell} |")
-        lines.append("")
+    current = None
+    for p, store, pid, offer in rows:
+        if p["id"] != current:
+            current = p["id"]
+            lines += ["", f"## {p['name']}", "",
+                      "| Magasin | Statut | Prix | Lu via | Trouvée par | Page | Diagnostic |",
+                      "|---|---|---|---|---|---|---|"]
+        r = results[pid]
+        diag = r.get("diag") or {}
+        cell = (diag.get("court", "") + " — " + diag.get("texte", "")[:120]).strip(" —").replace("|", "/")
+        lines.append(f"| {store} | {STATUS_LABEL.get(r['status'], r['status'])} | {fmt_price(r['price'])} | "
+                     f"{r['source'].replace('|', '/')} | {r.get('via', '')} | {r.get('url') or ''} | {cell} |")
     with open(path, "a", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
 
 
 def run(args):
-    products = load_products()
-    if not products:
-        print("products.json est vide ou illisible.")
+    cfg = load_config()
+    if not cfg:
+        print("products.json est vide, illisible ou à l'ancien format.")
         return 1
 
     webhook = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
@@ -564,89 +891,82 @@ def run(args):
         return send_discord(webhook, text) if sending else True
 
     state = load_json(STATE_FILE, {})
-    if not isinstance(state, dict) or "offres" not in state:
-        state = {"offres": {}, "liens": {}}  # ancien format : on repart de zéro
-    state.setdefault("liens", {})
+    if not isinstance(state, dict):
+        state = {}
+    for key in ("offres", "liens", "fiches", "recherches", "moteurs"):
+        state.setdefault(key, {})
 
-    # offres à vérifier ce passage-ci
-    offers = []
-    for p in products:
-        for o in p.get("offers", []):
-            mode = o.get("status", "actif")
-            if mode == "actif" or (mode == "test" and args.test):
-                offers.append((p, o))
+    jobs, rows, stores = build_jobs(cfg, args.test)
+    resolve_all([(p, o) for p, _, _, o in rows if not o.get("auto")], state, force=args.test)
 
-    # 1. liens raccourcis -> adresses directes des magasins
-    resolve_all(offers, state, force=args.test)
-
-    # 2. pages groupées par magasin ; les magasins sont vérifiés en parallèle
-    results, groups = {}, defaultdict(list)
-    for p, o in offers:
-        oid, url = offer_id(p, o), offer_url(o, state)
-        if url:
-            groups[host_of(url)].append((oid, o, url))
-        else:
-            err = state["liens"].get(o.get("link") or "", {}).get("err") or "aucun lien"
-            results[oid] = {"status": "lien", "price": None, "source": err,
-                            "diag": None, "url": o.get("link")}
-    if groups:
-        with ThreadPoolExecutor(max_workers=min(20, len(groups))) as ex:
-            for res in ex.map(check_group, groups.values()):
+    mode = "test" if args.test else "normal"
+    results, notes = {}, {}
+    if jobs:
+        with ThreadPoolExecutor(max_workers=min(20, len(jobs))) as ex:
+            futures = {name: ex.submit(check_store, (stores[name], pairs, state, mode))
+                       for name, pairs in jobs.items()}
+            for name, fut in futures.items():
+                res, n = fut.result()
                 results.update(res)
+                notes[name] = n
 
-    for p, o in offers:
-        r = results[offer_id(p, o)]
-        print(f"- {p['name']} [{o['store']}] -> {r['status']} / {fmt_price(r['price'])} ({r['source']})")
-    write_github_summary(products, offers, results)
+    for p, store, pid, _ in rows:
+        r = results[pid]
+        print(f"- {p['name']} [{store}] -> {r['status']} / {describe(r)}")
+    write_github_summary(rows, results)
 
     if args.test:
-        return send_test_report(products, offers, results, notify)
+        return send_test_report(cfg, rows, results, notes, notify)
 
-    # 3. décisions d'alerte
-    new_problems, recovered = [], []
+    # décisions d'alerte
+    new_problems, recovered, found = [], [], []
     seen = set()
-    for p, o in offers:
-        oid = offer_id(p, o)
-        seen.add(oid)
-        r = results[oid]
-        status, price, source = r["status"], r["price"], r["source"]
+    for p, store, pid, offer in rows:
+        seen.add(pid)
+        r = results[pid]
+        status, price = r["status"], r["price"]
         max_price = p.get("max_price")
-        st = state["offres"].setdefault(oid, {"status": None, "price": None, "alerted": False,
+        st = state["offres"].setdefault(pid, {"status": None, "price": None, "alerted": False,
                                               "problems": 0, "problem_notified": False})
+        if r.get("new"):
+            found.append(f"• {p['name']} — {store} : {r['url']}")
 
         if status in PROBLEM_STATUSES:
             st["problems"] += 1
             if st["problems"] >= PROBLEM_THRESHOLD and not st["problem_notified"]:
-                new_problems.append(f"• {p['name']} — {o['store']} : "
-                                    f"{PROBLEM_LABEL[status]} ({no_ping(source)})")
+                new_problems.append(f"• {p['name']} — {store} : "
+                                    f"{PROBLEM_LABEL.get(status, status)} ({no_ping(r['source'])})")
                 st["problem_notified"] = True
             continue
         if st["problem_notified"]:
-            recovered.append(f"• {p['name']} — {o['store']}")
+            recovered.append(f"• {p['name']} — {store}")
             st["problem_notified"] = False
         st["problems"] = 0
 
         price_ok = max_price is None or price is None or price <= max_price
-        reliable = source in RELIABLE_SOURCES or o.get("trust_text")
+        reliable = is_reliable(r, offer)
         alertable = status in IN_STATUSES and price_ok and reliable
         if alertable and not st["alerted"]:
             kind = "PRÉCOMMANDE" if status == "preorder" else "EN STOCK"
-            lines = [f"🚨 **{kind}** : {p['name']}", f"🏬 {o['store']}  •  💶 {fmt_price(price)}"]
+            lines = [f"🚨 **{kind}** : {p['name']}", f"🏬 {store}  •  💶 {fmt_price(price)}"]
             if price is None and max_price is not None:
                 lines.append(f"⚠️ prix non lu, vérifie qu'il est ≤ {fmt_price(max_price)}")
-            if source not in ("json-ld", "meta"):
-                lines.append(f"ℹ️ détection par {source} (moins fiable)")
+            if r["source"] not in ("json-ld", "meta"):
+                lines.append(f"ℹ️ détection par {r['source']} (moins fiable)")
             lines.append(r["url"])
             if notify("@everyone " + "\n".join(lines)):
                 st["alerted"] = True
         elif not alertable:
             if status in IN_STATUSES and not reliable:
-                print(f"  (en stock lu via {source}, peu fiable : pas d'alerte)")
+                print(f"  (en stock lu via {r['source']}, peu fiable : pas d'alerte)")
             elif status in IN_STATUSES:
                 print(f"  (en stock mais {fmt_price(price)} > {fmt_price(max_price)}, pas d'alerte)")
             st["alerted"] = False
         st["status"], st["price"] = status, price
 
+    if found:
+        for msg in chunks(["🔎 **Nouvelles fiches trouvées** (surveillées à partir de maintenant) :"] + found):
+            notify(msg)
     if new_problems:
         head = (f"⚠️ **Pages que je ne peux plus surveiller** (depuis {PROBLEM_THRESHOLD} passages) "
                 f"— aucune alerte possible pour elles tant que ça dure :")
@@ -656,51 +976,54 @@ def run(args):
         for msg in chunks(["✅ **Surveillance rétablie** :"] + recovered):
             notify(msg)
 
-    # oublie les offres retirées de products.json
-    state["offres"] = {k: v for k, v in state["offres"].items() if k in seen}
+    # oublie ce qui a été retiré de products.json
+    for key in ("offres", "fiches", "recherches"):
+        state[key] = {k: v for k, v in state[key].items() if k in seen}
     if not args.dry_run:
         save_state(state)
     return 0
 
 
-def send_test_report(products, offers, results, notify):
+def send_test_report(cfg, rows, results, notes, notify):
+    notify("🧪 **Test Pokéfada** : ce que le script lit pour chaque produit et chaque magasin\n"
+           "🟢 en stock • 🟡 précommande • 🔴 rupture • ⚪ pas trouvé dans ce magasin • "
+           "⏳ recherche au prochain passage • ❔ recherche du site illisible • ⛔ bloqué/erreur • "
+           "❓ illisible • 📋 pas une fiche produit • 🔗 lien non résolu\n"
+           "*(test)* = désactivé en temps normal")
     by_product = defaultdict(list)
-    for p, o in offers:
-        by_product[p["id"]].append(o)
-
-    notify("🧪 **Test Pokéfada** : ce que le script lit sur chaque page\n"
-           "🟢 en stock • 🟡 précommande • 🔴 rupture • ⛔ bloqué/erreur • ❓ illisible • 🔗 lien non résolu • 📋 pas une fiche produit\n"
-           "*(test)* = offre désactivée en temps normal • lu via json-ld/meta = fiable, "
-           "via texte/motif brut = pas d'alerte")
-    for p in products:
+    for p, store, pid, offer in rows:
+        by_product[p["id"]].append((store, pid, offer))
+    for p in cfg["products"]:
         if p["id"] not in by_product:
             continue
         cap = f" (alerte si ≤ {fmt_price(p['max_price'])})" if p.get("max_price") else ""
         lines = [f"**{p['name']}**{cap}"]
-        for o in by_product[p["id"]]:
-            r = results[offer_id(p, o)]
-            tag = " *(test)*" if o.get("status") == "test" else ""
-            if r["status"] in PROBLEM_STATUSES:
-                detail = no_ping(r["source"])
-            else:
-                detail = f"{fmt_price(r['price'])} (lu via {r['source']})"
-            lines.append(f"{ICONS.get(r['status'], '❓')} {o['store']}{tag} : "
-                         f"{STATUS_LABEL.get(r['status'], r['status'])}, {detail}")
+        for store, pid, offer in by_product[p["id"]]:
+            r = results[pid]
+            tag = " *(test)*" if offer.get("status") == "test" else ""
+            label = STATUS_LABEL.get(r["status"], r["status"])
+            detail = describe(r)
+            text = label if norm(detail) == norm(label) else f"{label}, {detail}"
+            lines.append(f"{ICONS.get(r['status'], '❓')} {store}{tag} : {text}")
         for msg in chunks(lines):
             notify(msg)
 
-    # un diagnostic par magasin (la 1re page en échec), le détail complet est sur GitHub
+    # un diagnostic par magasin : sa recherche, et la 1re page en échec
     per_store = {}
-    for p, o in offers:
-        r = results[offer_id(p, o)]
-        store = o["store"].split(" (")[0]
-        if r["status"] in PROBLEM_STATUSES and store not in per_store:
+    for p, store, pid, offer in rows:
+        r = results[pid]
+        line = per_store.setdefault(store, {"engine": "; ".join(x for x in notes.get(store, []) if x),
+                                            "problem": None})
+        if r["status"] in PROBLEM_STATUSES and not line["problem"]:
             d = r.get("diag") or {}
-            per_store[store] = f"• **{store}** : {no_ping(d.get('court') or r['source'])}"
-    if per_store:
-        head = ("🔎 **Diagnostic par magasin** (détail complet : onglet Actions → "
-                "ce passage → Summary)")
-        for msg in chunks([head] + list(per_store.values())):
+            line["problem"] = d.get("court") or r["source"]
+    out = ["🔎 **Diagnostic par magasin** (détail : onglet Actions → ce passage → Summary)"]
+    for store, info in per_store.items():
+        parts = [x for x in (info["engine"], info["problem"]) if x]
+        if parts:
+            out.append(f"• **{store}** : {no_ping(' / '.join(parts))}")
+    if len(out) > 1:
+        for msg in chunks(out):
             notify(msg)
     return 0
 

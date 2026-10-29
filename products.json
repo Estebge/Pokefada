@@ -1,494 +1,93 @@
 {
   "_aide": [
-    "status : 'actif' = surveillé tout le temps ; 'test' = vérifié seulement en mode test ; 'off' = jamais.",
-    "url = adresse directe de la fiche ; link = lien raccourci (Chocobonplan) que le script convertit une fois en adresse directe.",
-    "max_price : pas d'alerte si le prix lu dépasse ce montant (null = pas de limite)."
+    "stores : les magasins. status 'actif' = surveillé ; 'test' = seulement en mode test ; 'off' = jamais.",
+    "search : adresse de recherche du site ({q} = ce qu'on cherche). Si elle ne marche pas, le script essaie des formats courants.",
+    "products : ean = code-barres (le plus sûr pour reconnaître la fiche) ; query = texte tapé dans la recherche ;",
+    "must = mots qui doivent tous être dans le nom (une liste entre crochets = un seul suffit) ; exclude = mots interdits.",
+    "offers (facultatif) : adresse fixe pour un magasin, à la place de la recherche automatique."
+  ],
+  "stores": [
+    {"name": "E.Leclerc", "domain": "e.leclerc", "status": "actif",
+     "search": ["https://www.e.leclerc/recherche?q={q}"]},
+    {"name": "1001Hobbies", "domain": "1001hobbies.fr", "status": "actif",
+     "search": ["https://www.1001hobbies.fr/recherche?q={q}", "https://www.1001hobbies.fr/search?q={q}"]},
+    {"name": "BCD Jeux", "domain": "bcd-jeux.fr", "status": "actif",
+     "search": ["https://www.bcd-jeux.fr/recherche?controller=search&s={q}"]},
+    {"name": "JouéClub", "domain": "joueclub.fr", "status": "actif",
+     "search": ["https://www.joueclub.fr/contenu/resultat-de-recherche-produits.html?searchText={q}"]},
+    {"name": "Micromania", "domain": "micromania.fr", "status": "actif",
+     "search": ["https://www.micromania.fr/search?q={q}", "https://www.micromania.fr/recherche?q={q}"]},
+    {"name": "LaGrandeRécré", "domain": "lagranderecre.fr", "status": "actif",
+     "search": ["https://www.lagranderecre.fr/recherche?q={q}", "https://www.lagranderecre.fr/catalogsearch/result/?q={q}"]},
+    {"name": "Fnac", "domain": "fnac.com", "status": "off", "_note": "bloque le script (HTTP 403, test du 29/10)"},
+    {"name": "Carrefour", "domain": "carrefour.fr", "status": "off", "_note": "bloque le script (HTTP 403, test du 29/10)"},
+    {"name": "Cultura", "domain": "cultura.com", "status": "off", "_note": "page anti-robot Cloudflare (test du 29/10)"},
+    {"name": "KingJouet", "domain": "king-jouet.com", "status": "off", "_note": "bloque le script (HTTP 403, test du 29/10)"},
+    {"name": "Cdiscount", "domain": "cdiscount.com", "status": "off", "_note": "page vide pour le script (test du 29/10)"},
+    {"name": "Smyths Toys", "domain": "smythstoys.com", "status": "off", "_note": "page vide pour le script (test du 29/10)"},
+    {"name": "Amazon", "domain": "amazon.fr", "status": "off", "_note": "interdit le scraping et vend sur invitation"}
   ],
   "products": [
     {
-      "id": "etb-me04",
-      "name": "ETB Chaos Ascendant (ME04)",
-      "max_price": 60,
+      "id": "etb-me04", "name": "ETB Chaos Ascendant (ME04)", "max_price": 60,
+      "ean": "0196214139961", "query": "coffret dresseur elite chaos ascendant",
+      "must": [["chaos ascendant", "me04", "me4"], ["coffret dresseur", "dresseur d elite", "etb", "elite trainer"]],
+      "exclude": ["bundle", "display", "case", "pokemon center", "36 boosters", "18 boosters"],
       "offers": [
-        {
-          "store": "Fnac",
-          "url": "https://www.fnac.com/a22390738",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "E.Leclerc",
-          "link": "https://bit.ly/4f2JQmH",
-          "status": "actif"
-        },
-        {
-          "store": "Carrefour",
-          "link": "https://bit.ly/4wR0Naj",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "Micromania",
-          "link": "https://bit.ly/42Roh10",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        },
-        {
-          "store": "BCD Jeux",
-          "link": "https://bit.ly/4uooODH",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Pokémon TCG (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré",
-          "link": "https://bit.ly/42L2Z5l",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "JouéClub",
-          "link": "https://bit.ly/42OMlBU",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "KingJouet",
-          "link": "https://chocobp.com/jomn7d",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403 / 410)"
-        },
-        {
-          "store": "Cdiscount",
-          "link": "https://tidd.ly/4nJHlYQ",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Fnac (listing)",
-          "link": "https://tidd.ly/42Tgi3E",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "LaGrandeRécré (autre accès)",
-          "link": "https://bit.ly/42Ktw2H",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "JouéClub (autre accès)",
-          "link": "https://bit.ly/4dW7OPn",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "Amazon",
-          "link": "https://chocobp.com/ula8ve",
-          "status": "off",
-          "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"
-        }
+        {"store": "E.Leclerc", "link": "https://bit.ly/4f2JQmH", "status": "actif", "_note": "fiche vérifiée le 29/10"},
+        {"store": "LaGrandeRécré", "url": "https://www.lagranderecre.fr/jeux-de-societe/cartes-a-collectionner/coffret-dresseur-d-elite-pokemon-mega-evolution-chaos-ascendant.html", "status": "actif"}
       ]
     },
     {
-      "id": "bundle-me04",
-      "name": "Bundle 6 boosters Chaos Ascendant (ME04)",
-      "max_price": 40,
+      "id": "bundle-me04", "name": "Bundle 6 boosters Chaos Ascendant (ME04)", "max_price": 40,
+      "ean": "0196214140356", "query": "bundle chaos ascendant",
+      "must": [["chaos ascendant", "me04", "me4"], ["bundle", "6 boosters", "lot de 6"]],
+      "exclude": ["display", "coffret dresseur", "etb", "case", "36 boosters", "18 boosters", "tripack", "3 boosters"]
+    },
+    {
+      "id": "etb-me05", "name": "ETB Nuit Noire (ME05)", "max_price": 60,
+      "ean": "0196214142145", "query": "coffret dresseur elite nuit noire",
+      "must": [["nuit noire", "me05", "me5"], ["coffret dresseur", "dresseur d elite", "etb", "elite trainer"]],
+      "exclude": ["bundle", "display", "case", "pokemon center", "36 boosters", "18 boosters"],
       "offers": [
-        {
-          "store": "Fnac",
-          "url": "https://www.fnac.com/a22390745",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "E.Leclerc",
-          "link": "https://bit.ly/4upnh09",
-          "status": "test",
-          "_note": "HTTP 404 au test du 29/10 : fiche supprimée ?"
-        },
-        {
-          "store": "Carrefour",
-          "link": "https://bit.ly/49OeooJ",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "Micromania",
-          "link": "https://chocobp.com/1903xr",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        },
-        {
-          "store": "BCD Jeux",
-          "link": "https://bit.ly/4tV9OMJ",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Pokémon TCG (vérifié le 29/10)"
-        },
-        {
-          "store": "Cultura",
-          "link": "https://chocobp.com/lvkmz7",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page anti-robot Cloudflare)"
-        },
-        {
-          "store": "LaGrandeRécré",
-          "link": "https://bit.ly/4uqiUC3",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "JouéClub",
-          "link": "https://bit.ly/4fy5IXd",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "Cdiscount",
-          "link": "https://tidd.ly/4nJHlYQ",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Fnac (listing)",
-          "link": "https://tidd.ly/3PujkIB",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "LaGrandeRécré (autre accès)",
-          "link": "https://bit.ly/49hYrXH",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "JouéClub (autre accès)",
-          "link": "https://bit.ly/4v8wIkV",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "Amazon",
-          "link": "https://chocobp.com/mz085j",
-          "status": "off",
-          "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"
-        }
+        {"store": "E.Leclerc", "link": "https://bit.ly/4fmr7kI", "status": "actif", "_note": "fiche vérifiée le 29/10"}
       ]
     },
     {
-      "id": "etb-me05",
-      "name": "ETB Nuit Noire (ME05)",
-      "max_price": 60,
+      "id": "bundle-me05", "name": "Bundle 6 boosters Nuit Noire (ME05)", "max_price": 40,
+      "ean": "0196214142688", "query": "bundle nuit noire",
+      "must": [["nuit noire", "me05", "me5"], ["bundle", "6 boosters", "lot de 6"]],
+      "exclude": ["display", "coffret dresseur", "etb", "case", "36 boosters", "18 boosters", "tripack", "3 boosters"]
+    },
+    {
+      "id": "etb-30ans", "name": "ETB Pokémon 30 ans", "max_price": 60,
+      "query": "coffret dresseur elite pokemon 30 ans",
+      "must": [["30 ans", "30e anniversaire", "30eme anniversaire", "30eme", "30th", "me05 5", "me5 5"], ["coffret dresseur", "dresseur d elite", "etb", "elite trainer"]],
+      "exclude": ["bundle", "display", "case", "pokemon center", "classeur", "collection premium", "upc"],
       "offers": [
-        {
-          "store": "Fnac",
-          "url": "https://www.fnac.com/a22390740",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "E.Leclerc",
-          "link": "https://bit.ly/4fmr7kI",
-          "status": "actif"
-        },
-        {
-          "store": "Carrefour",
-          "link": "https://bit.ly/4punFZR",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "Cdiscount",
-          "link": "https://tidd.ly/4wFCqeK",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Micromania",
-          "link": "https://bit.ly/4fv3cj9",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        },
-        {
-          "store": "Cultura",
-          "link": "https://tidd.ly/4fqoLRH",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page anti-robot Cloudflare)"
-        },
-        {
-          "store": "JouéClub",
-          "link": "https://bit.ly/3RDPFO8",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré",
-          "link": "https://bit.ly/4pvegBo",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "KingJouet",
-          "link": "https://bit.ly/4vFeIOT",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403 / 410)"
-        },
-        {
-          "store": "Fnac (listing)",
-          "link": "https://tidd.ly/3RMpcxZ",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "JouéClub (listing)",
-          "link": "https://bit.ly/3RhY2Pi",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré (listing)",
-          "link": "https://bit.ly/458zJXe",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "Amazon",
-          "link": "https://chocobp.com/jgps9q",
-          "status": "off",
-          "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"
-        }
+        {"store": "1001Hobbies", "link": "https://bit.ly/3UXsv6C", "status": "actif", "_note": "fiche vérifiée le 29/10"}
       ]
     },
     {
-      "id": "bundle-me05",
-      "name": "Bundle 6 boosters Nuit Noire (ME05)",
-      "max_price": 40,
+      "id": "bundle-30ans", "name": "Bundle 6 boosters Pokémon 30 ans", "max_price": 40,
+      "ean": "0196214145221", "query": "bundle pokemon 30 ans",
+      "must": [["30 ans", "30e anniversaire", "30eme anniversaire", "30eme", "30th", "me05 5", "me5 5"], ["bundle", "6 boosters", "lot de 6"]],
+      "exclude": ["display", "coffret dresseur", "etb", "case", "36 boosters", "18 boosters", "tripack", "3 boosters", "classeur"],
       "offers": [
-        {
-          "store": "Fnac",
-          "url": "https://www.fnac.com/a22390757",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "E.Leclerc",
-          "link": "https://bit.ly/4fmdZMa",
-          "status": "test",
-          "_note": "HTTP 404 au test du 29/10 : fiche supprimée ?"
-        },
-        {
-          "store": "Cdiscount",
-          "link": "https://tidd.ly/4f5UsAS",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Micromania",
-          "link": "https://chocobp.com/zimlrp",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        },
-        {
-          "store": "BCD Jeux",
-          "link": "https://chocobp.com/bcq0u7",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Pokémon TCG (vérifié le 29/10)"
-        },
-        {
-          "store": "Cultura",
-          "link": "https://tidd.ly/4pqdk0Z",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page anti-robot Cloudflare)"
-        },
-        {
-          "store": "JouéClub",
-          "link": "https://bit.ly/4fn3jgk",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré",
-          "link": "https://bit.ly/4f8ox2R",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "KingJouet",
-          "link": "https://bit.ly/4gJKoPd",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403 / 410)"
-        },
-        {
-          "store": "JouéClub (listing)",
-          "link": "https://bit.ly/4pnYoQS",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré (listing)",
-          "link": "https://bit.ly/4wOVR4Q",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "Amazon",
-          "link": "https://chocobp.com/zvcqh3",
-          "status": "off",
-          "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"
-        }
+        {"store": "BCD Jeux", "url": "https://www.bcd-jeux.fr/pokemon-tcg/39594--pokemon-anniversaire-30-ans-bundle-6-boosters-pokemon-0196214145221.html", "status": "actif"}
       ]
     },
     {
-      "id": "etb-30ans",
-      "name": "ETB Pokémon 30 ans",
-      "max_price": 60,
-      "offers": [
-        {
-          "store": "Fnac",
-          "link": "https://tidd.ly/4rayEIy",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "Carrefour",
-          "link": "https://bit.ly/469B14X",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "Cdiscount",
-          "link": "https://tidd.ly/4xvhB5M",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Micromania",
-          "link": "https://bit.ly/4hmXaTy",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        },
-        {
-          "store": "1001Hobbies",
-          "link": "https://bit.ly/3UXsv6C",
-          "status": "actif"
-        },
-        {
-          "store": "Cultura",
-          "link": "https://tidd.ly/4rfkMNq",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page anti-robot Cloudflare)"
-        },
-        {
-          "store": "JouéClub",
-          "link": "https://bit.ly/4xlGK2x",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré",
-          "link": "https://bit.ly/4xxmTOf",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "Fnac (listing)",
-          "link": "https://tidd.ly/4xT74Cd",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403)"
-        },
-        {
-          "store": "Cdiscount (listing)",
-          "link": "https://tidd.ly/4irjdcR",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Amazon",
-          "link": "https://chocobp.com/sid3o1",
-          "status": "off",
-          "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"
-        }
-      ]
+      "id": "etb-me06", "name": "ETB Règne Delta (ME06)", "max_price": 60,
+      "query": "coffret dresseur elite regne delta",
+      "must": [["regne delta", "me06", "me6"], ["coffret dresseur", "dresseur d elite", "etb", "elite trainer"]],
+      "exclude": ["bundle", "display", "case", "pokemon center", "36 boosters", "18 boosters"]
     },
     {
-      "id": "bundle-30ans",
-      "name": "Bundle 6 boosters Pokémon 30 ans",
-      "max_price": 40,
-      "offers": [
-        {
-          "store": "Cdiscount",
-          "link": "https://tidd.ly/47vDdnN",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "BCD Jeux",
-          "url": "https://www.bcd-jeux.fr/pokemon-tcg/39594--pokemon-anniversaire-30-ans-bundle-6-boosters-pokemon-0196214145221.html",
-          "status": "test",
-          "_note": "vraie fiche, mais stock lu par motif brut (peu fiable)"
-        },
-        {
-          "store": "JouéClub",
-          "link": "https://bit.ly/4xQH2yF",
-          "status": "off",
-          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
-        },
-        {
-          "store": "LaGrandeRécré",
-          "link": "https://bit.ly/4yCbpdt",
-          "status": "off",
-          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
-        },
-        {
-          "store": "KingJouet",
-          "url": "https://www.king-jouet.com/jeu-jouet/jeux-societes/cartes-a-collectionner/ref-1034922-pokemon-30-ans-bundle-6-boosters.htm",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : HTTP 403 / 410)"
-        },
-        {
-          "store": "Amazon",
-          "link": "https://link.amazon/B01zhvrjZ",
-          "status": "off",
-          "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"
-        }
-      ]
-    },
-    {
-      "id": "etb-me06",
-      "name": "ETB Règne Delta (ME06)",
-      "max_price": 60,
-      "offers": [
-        {
-          "store": "Smyths Toys",
-          "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-me06-mega-evolution-regne-delta/p/261817",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Micromania (tirage au sort)",
-          "link": "https://bit.ly/4zko84T",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        }
-      ]
-    },
-    {
-      "id": "bundle-me06",
-      "name": "Bundle 6 boosters Règne Delta (ME06)",
-      "max_price": 40,
-      "offers": [
-        {
-          "store": "Smyths Toys",
-          "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-bundle-6-boosters-me06-mega-evolution-regne-delta/p/261789",
-          "status": "off",
-          "_note": "bloque les robots depuis GitHub (test du 29/10 : page vide sans contenu)"
-        },
-        {
-          "store": "Micromania (tirage au sort)",
-          "link": "https://bit.ly/4zko84T",
-          "status": "off",
-          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
-        }
-      ]
+      "id": "bundle-me06", "name": "Bundle 6 boosters Règne Delta (ME06)", "max_price": 40,
+      "ean": "0196214144002", "query": "bundle regne delta",
+      "must": [["regne delta", "me06", "me6"], ["bundle", "6 boosters", "lot de 6"]],
+      "exclude": ["display", "coffret dresseur", "etb", "case", "36 boosters", "18 boosters", "tripack", "3 boosters"]
     }
   ]
 }
