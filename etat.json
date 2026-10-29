@@ -1,4 +1,21 @@
 {
+  "fiches": {
+    "bundle-me04|LaGrandeRécré": {
+      "preuve": "code-barres",
+      "ts": 1793307220,
+      "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
+    },
+    "bundle-me05|LaGrandeRécré": {
+      "preuve": "code-barres",
+      "ts": 1793307220,
+      "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
+    },
+    "etb-me05|LaGrandeRécré": {
+      "preuve": "code-barres",
+      "ts": 1793307220,
+      "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
+    }
+  },
   "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-30eme-anniversaire/p/261821": {
     "alerted": false,
     "price": null,
@@ -19,5 +36,406 @@
     "problem_notified": true,
     "problems": 90,
     "status": null
+  },
+  "liens": {
+    "https://bit.ly/3UXsv6C": {
+      "err": null,
+      "ts": 1793307219,
+      "url": "https://www.1001hobbies.fr/jeux-de-cartes-a-jouer/892561-pokemon-company-bm-258861-pokemon-30eme-anniversaire-elite-trainer-196214144835.html"
+    },
+    "https://bit.ly/4f2JQmH": {
+      "err": null,
+      "ts": 1793307219,
+      "url": "https://www.e.leclerc/fp/pokemon-me04-coffret-dresseur-d-elite-0196214139961"
+    },
+    "https://bit.ly/4fmr7kI": {
+      "err": null,
+      "ts": 1793307219,
+      "url": "https://www.e.leclerc/fp/pokemon-me05-coffret-dresseur-d-elite-0196214142145"
+    }
+  },
+  "moteurs": {
+    "1001Hobbies": {
+      "diag": "recherche bloquée (HTTP 403)",
+      "template": null,
+      "ts": 1793307220
+    },
+    "BCD Jeux": {
+      "diag": "recherche OK (42 liens Pokémon)",
+      "template": "https://www.bcd-jeux.fr/recherche?controller=search&s={q}",
+      "ts": 1793307220
+    },
+    "E.Leclerc": {
+      "diag": "recherche OK (44 liens Pokémon)",
+      "template": "https://www.e.leclerc/recherche?q={q}",
+      "ts": 1793307220
+    },
+    "JouéClub": {
+      "diag": "recherche OK (26 liens Pokémon)",
+      "template": "https://www.joueclub.fr/contenu/resultat-de-recherche-produits.html?searchText={q}",
+      "ts": 1793307220
+    },
+    "LaGrandeRécré": {
+      "diag": "recherche OK (5 liens Pokémon)",
+      "template": "https://www.lagranderecre.fr/catalogsearch/result/?q={q}",
+      "ts": 1793307220
+    },
+    "Micromania": {
+      "diag": "page de recherche sans liens produit lisibles (HTTP 200, 0 ko, titre « (aucun) », mots : aucun)",
+      "template": null,
+      "ts": 1793307220
+    }
+  },
+  "offres": {
+    "bundle-30ans|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-30ans|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "out_of_stock"
+    },
+    "bundle-30ans|E.Leclerc": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-30ans|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-30ans|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-30ans|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-me04|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-me04|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "bundle-me04|E.Leclerc": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "bundle-me04|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "bundle-me04|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 1,
+      "status": null
+    },
+    "bundle-me04|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-me05|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-me05|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-me05|E.Leclerc": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "bundle-me05|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-me05|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 1,
+      "status": null
+    },
+    "bundle-me05|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-me06|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "bundle-me06|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-me06|E.Leclerc": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-me06|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-me06|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "bundle-me06|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-30ans|1001Hobbies": {
+      "alerted": false,
+      "price": 69.99,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "out_of_stock"
+    },
+    "etb-30ans|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-30ans|E.Leclerc": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "etb-30ans|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-30ans|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-30ans|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-me04|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-me04|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "etb-me04|E.Leclerc": {
+      "alerted": false,
+      "price": 98.59,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "in_stock"
+    },
+    "etb-me04|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "etb-me04|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "in_stock"
+    },
+    "etb-me04|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-me05|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-me05|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "etb-me05|E.Leclerc": {
+      "alerted": false,
+      "price": 159.99,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "in_stock"
+    },
+    "etb-me05|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
+    },
+    "etb-me05|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 1,
+      "status": null
+    },
+    "etb-me05|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-me06|1001Hobbies": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    },
+    "etb-me06|BCD Jeux": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-me06|E.Leclerc": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-me06|JouéClub": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-me06|LaGrandeRécré": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "attente"
+    },
+    "etb-me06|Micromania": {
+      "alerted": false,
+      "price": null,
+      "problem_notified": false,
+      "problems": 0,
+      "status": "recherche"
+    }
+  },
+  "recherches": {
+    "bundle-me04|BCD Jeux": 1793307220,
+    "bundle-me04|E.Leclerc": 1793307220,
+    "bundle-me04|JouéClub": 1793307220,
+    "bundle-me04|LaGrandeRécré": 1793307220,
+    "bundle-me05|E.Leclerc": 1793307220,
+    "bundle-me05|LaGrandeRécré": 1793307220,
+    "etb-30ans|E.Leclerc": 1793307220,
+    "etb-me04|BCD Jeux": 1793307220,
+    "etb-me04|JouéClub": 1793307220,
+    "etb-me05|BCD Jeux": 1793307220,
+    "etb-me05|JouéClub": 1793307220,
+    "etb-me05|LaGrandeRécré": 1793307220
   }
 }
