@@ -125,13 +125,18 @@ def resolve_link(link, session):
     url = link
     for _ in range(10):
         host = host_of(url)
-        if is_merchant(host):
-            clean = clean_url(url)
-            return (clean, None) if clean else (None, f"renvoie vers l'accueil de {host}")
         target = embedded_merchant_url(url)
-        if target:
+        if target and target != url:
             url = target
             continue
+        if is_merchant(host):
+            clean = clean_url(url)
+            if clean:
+                return clean, None
+            if not urlsplit(url).query:
+                return None, f"renvoie vers l'accueil de {host}"
+            # racine d'un sous-domaine du magasin avec paramètres (ex. xht.micromania.fr/?...) :
+            # c'est un redirecteur de suivi, on continue à le suivre
         try:
             r = session.get(url, headers=HEADERS, timeout=20, allow_redirects=False)
         except requests.RequestException as e:
@@ -145,6 +150,8 @@ def resolve_link(link, session):
         if m:
             url = urljoin(url, unescape(m.group(1)))
             continue
+        if is_merchant(host):
+            return None, f"renvoie vers l'accueil de {host}"
         return None, f"bloqué sur {host} (HTTP {r.status_code})"
     return None, "trop de redirections"
 
@@ -617,7 +624,8 @@ def send_test_report(products, offers, results, notify):
 
     notify("🧪 **Test Pokéfada** : ce que le script lit sur chaque page\n"
            "🟢 en stock • 🟡 précommande • 🔴 rupture • ⛔ bloqué/erreur • ❓ illisible • 🔗 lien non résolu\n"
-           "*(test)* = offre désactivée en temps normal")
+           "*(test)* = offre désactivée en temps normal • lu via json-ld/meta = fiable, "
+           "via texte/motif brut = à vérifier")
     for p in products:
         if p["id"] not in by_product:
             continue
@@ -626,7 +634,10 @@ def send_test_report(products, offers, results, notify):
         for o in by_product[p["id"]]:
             r = results[offer_id(p, o)]
             tag = " *(test)*" if o.get("status") == "test" else ""
-            detail = fmt_price(r["price"]) if r["status"] not in PROBLEM_STATUSES else no_ping(r["source"])
+            if r["status"] in PROBLEM_STATUSES:
+                detail = no_ping(r["source"])
+            else:
+                detail = f"{fmt_price(r['price'])} (lu via {r['source']})"
             lines.append(f"{ICONS.get(r['status'], '❓')} {o['store']}{tag} : "
                          f"{STATUS_LABEL.get(r['status'], r['status'])}, {detail}")
         for msg in chunks(lines):
