@@ -1,20 +1,137 @@
-[
-  {
-    "name": "Bundle 6 boosters Méga-Évolution Nuit Noire (ME05)",
-    "store": "Smyths Toys",
-    "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-mega-evolution-nuit-noire-me05-bundle-6-boosters/p/260783",
-    "max_price": 38
-  },
-  {
-    "name": "ETB Méga-Évolution Chaos Ascendant (ME04)",
-    "store": "Smyths Toys",
-    "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-me04-mega-evolution-chaos-ascendant/p/260763",
-    "max_price": null
-  },
-  {
-    "name": "ETB Pokémon 30 ans",
-    "store": "Smyths Toys",
-    "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-30eme-anniversaire/p/261821",
-    "max_price": null
-  }
-]
+{
+  "_aide": [
+    "status : 'actif' = surveillé tout le temps ; 'test' = vérifié seulement en mode test ; 'off' = jamais.",
+    "url = adresse directe de la fiche ; link = lien raccourci (Chocobonplan) que le script convertit une fois en adresse directe.",
+    "max_price : pas d'alerte si le prix lu dépasse ce montant (null = pas de limite)."
+  ],
+  "products": [
+    {
+      "id": "etb-me04",
+      "name": "ETB Chaos Ascendant (ME04)",
+      "max_price": 60,
+      "offers": [
+        {"store": "Fnac", "url": "https://www.fnac.com/a22390738", "status": "actif"},
+        {"store": "E.Leclerc", "link": "https://bit.ly/4f2JQmH", "status": "actif"},
+        {"store": "Carrefour", "link": "https://bit.ly/4wR0Naj", "status": "actif"},
+        {"store": "Micromania", "link": "https://bit.ly/42Roh10", "status": "actif"},
+        {"store": "BCD Jeux", "link": "https://bit.ly/4uooODH", "status": "actif"},
+        {"store": "LaGrandeRécré", "link": "https://bit.ly/42L2Z5l", "status": "actif"},
+        {"store": "JouéClub", "link": "https://bit.ly/42OMlBU", "status": "actif"},
+        {"store": "KingJouet", "link": "https://chocobp.com/jomn7d", "status": "actif"},
+        {"store": "Cdiscount", "link": "https://tidd.ly/4nJHlYQ", "status": "test", "_note": "même lien que le bundle ME04 : sûrement une page liste"},
+        {"store": "Fnac (listing)", "link": "https://tidd.ly/42Tgi3E", "status": "test"},
+        {"store": "LaGrandeRécré (autre accès)", "link": "https://bit.ly/42Ktw2H", "status": "test"},
+        {"store": "JouéClub (autre accès)", "link": "https://bit.ly/4dW7OPn", "status": "test"},
+        {"store": "Amazon", "link": "https://chocobp.com/ula8ve", "status": "off", "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"}
+      ]
+    },
+    {
+      "id": "bundle-me04",
+      "name": "Bundle 6 boosters Chaos Ascendant (ME04)",
+      "max_price": 40,
+      "offers": [
+        {"store": "Fnac", "url": "https://www.fnac.com/a22390745", "status": "actif"},
+        {"store": "E.Leclerc", "link": "https://bit.ly/4upnh09", "status": "actif"},
+        {"store": "Carrefour", "link": "https://bit.ly/49OeooJ", "status": "actif"},
+        {"store": "Micromania", "link": "https://chocobp.com/1903xr", "status": "actif"},
+        {"store": "BCD Jeux", "link": "https://bit.ly/4tV9OMJ", "status": "actif"},
+        {"store": "Cultura", "link": "https://chocobp.com/lvkmz7", "status": "actif"},
+        {"store": "LaGrandeRécré", "link": "https://bit.ly/4uqiUC3", "status": "actif"},
+        {"store": "JouéClub", "link": "https://bit.ly/4fy5IXd", "status": "actif"},
+        {"store": "Cdiscount", "link": "https://tidd.ly/4nJHlYQ", "status": "test", "_note": "même lien que l'ETB ME04 : sûrement une page liste"},
+        {"store": "Fnac (listing)", "link": "https://tidd.ly/3PujkIB", "status": "test"},
+        {"store": "LaGrandeRécré (autre accès)", "link": "https://bit.ly/49hYrXH", "status": "test"},
+        {"store": "JouéClub (autre accès)", "link": "https://bit.ly/4v8wIkV", "status": "test"},
+        {"store": "Amazon", "link": "https://chocobp.com/mz085j", "status": "off", "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"}
+      ]
+    },
+    {
+      "id": "etb-me05",
+      "name": "ETB Nuit Noire (ME05)",
+      "max_price": 60,
+      "offers": [
+        {"store": "Fnac", "url": "https://www.fnac.com/a22390740", "status": "actif"},
+        {"store": "E.Leclerc", "link": "https://bit.ly/4fmr7kI", "status": "actif"},
+        {"store": "Carrefour", "link": "https://bit.ly/4punFZR", "status": "actif"},
+        {"store": "Cdiscount", "link": "https://tidd.ly/4wFCqeK", "status": "actif"},
+        {"store": "Micromania", "link": "https://bit.ly/4fv3cj9", "status": "actif"},
+        {"store": "Cultura", "link": "https://tidd.ly/4fqoLRH", "status": "actif"},
+        {"store": "JouéClub", "link": "https://bit.ly/3RDPFO8", "status": "actif"},
+        {"store": "LaGrandeRécré", "link": "https://bit.ly/4pvegBo", "status": "actif"},
+        {"store": "KingJouet", "link": "https://bit.ly/4vFeIOT", "status": "actif"},
+        {"store": "Fnac (listing)", "link": "https://tidd.ly/3RMpcxZ", "status": "test"},
+        {"store": "JouéClub (listing)", "link": "https://bit.ly/3RhY2Pi", "status": "test"},
+        {"store": "LaGrandeRécré (listing)", "link": "https://bit.ly/458zJXe", "status": "test"},
+        {"store": "Amazon", "link": "https://chocobp.com/jgps9q", "status": "off", "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"}
+      ]
+    },
+    {
+      "id": "bundle-me05",
+      "name": "Bundle 6 boosters Nuit Noire (ME05)",
+      "max_price": 40,
+      "offers": [
+        {"store": "Fnac", "url": "https://www.fnac.com/a22390757", "status": "actif"},
+        {"store": "E.Leclerc", "link": "https://bit.ly/4fmdZMa", "status": "actif"},
+        {"store": "Cdiscount", "link": "https://tidd.ly/4f5UsAS", "status": "actif"},
+        {"store": "Micromania", "link": "https://chocobp.com/zimlrp", "status": "actif"},
+        {"store": "BCD Jeux", "link": "https://chocobp.com/bcq0u7", "status": "actif"},
+        {"store": "Cultura", "link": "https://tidd.ly/4pqdk0Z", "status": "actif"},
+        {"store": "JouéClub", "link": "https://bit.ly/4fn3jgk", "status": "actif"},
+        {"store": "LaGrandeRécré", "link": "https://bit.ly/4f8ox2R", "status": "actif"},
+        {"store": "KingJouet", "link": "https://bit.ly/4gJKoPd", "status": "actif"},
+        {"store": "JouéClub (listing)", "link": "https://bit.ly/4pnYoQS", "status": "test"},
+        {"store": "LaGrandeRécré (listing)", "link": "https://bit.ly/4wOVR4Q", "status": "test"},
+        {"store": "Amazon", "link": "https://chocobp.com/zvcqh3", "status": "off", "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"}
+      ]
+    },
+    {
+      "id": "etb-30ans",
+      "name": "ETB Pokémon 30 ans",
+      "max_price": 60,
+      "offers": [
+        {"store": "Fnac", "link": "https://tidd.ly/4rayEIy", "status": "actif"},
+        {"store": "Carrefour", "link": "https://bit.ly/469B14X", "status": "actif"},
+        {"store": "Cdiscount", "link": "https://tidd.ly/4xvhB5M", "status": "actif"},
+        {"store": "Micromania", "link": "https://bit.ly/4hmXaTy", "status": "actif"},
+        {"store": "1001Hobbies", "link": "https://bit.ly/3UXsv6C", "status": "actif"},
+        {"store": "Cultura", "link": "https://tidd.ly/4rfkMNq", "status": "actif"},
+        {"store": "JouéClub", "link": "https://bit.ly/4xlGK2x", "status": "actif"},
+        {"store": "LaGrandeRécré", "link": "https://bit.ly/4xxmTOf", "status": "actif"},
+        {"store": "Fnac (listing)", "link": "https://tidd.ly/4xT74Cd", "status": "test"},
+        {"store": "Cdiscount (listing)", "link": "https://tidd.ly/4irjdcR", "status": "test"},
+        {"store": "Amazon", "link": "https://chocobp.com/sid3o1", "status": "off", "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"}
+      ]
+    },
+    {
+      "id": "bundle-30ans",
+      "name": "Bundle 6 boosters Pokémon 30 ans",
+      "max_price": 40,
+      "offers": [
+        {"store": "Cdiscount", "link": "https://tidd.ly/47vDdnN", "status": "actif"},
+        {"store": "BCD Jeux", "url": "https://www.bcd-jeux.fr/pokemon-tcg/39594--pokemon-anniversaire-30-ans-bundle-6-boosters-pokemon-0196214145221.html", "status": "actif"},
+        {"store": "JouéClub", "link": "https://bit.ly/4xQH2yF", "status": "actif"},
+        {"store": "LaGrandeRécré", "link": "https://bit.ly/4yCbpdt", "status": "actif"},
+        {"store": "KingJouet", "url": "https://www.king-jouet.com/jeu-jouet/jeux-societes/cartes-a-collectionner/ref-1034922-pokemon-30-ans-bundle-6-boosters.htm", "status": "actif"},
+        {"store": "Amazon", "link": "https://link.amazon/B01zhvrjZ", "status": "off", "_note": "Amazon interdit le scraping, bloque GitHub et vend sur invitation"}
+      ]
+    },
+    {
+      "id": "etb-me06",
+      "name": "ETB Règne Delta (ME06)",
+      "max_price": 60,
+      "offers": [
+        {"store": "Smyths Toys", "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-me06-mega-evolution-regne-delta/p/261817", "status": "actif"},
+        {"store": "Micromania (tirage au sort)", "link": "https://bit.ly/4zko84T", "status": "test", "_note": "page du tirage réservé Premium/Ultimate, pas une fiche produit"}
+      ]
+    },
+    {
+      "id": "bundle-me06",
+      "name": "Bundle 6 boosters Règne Delta (ME06)",
+      "max_price": 40,
+      "offers": [
+        {"store": "Smyths Toys", "url": "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-bundle-6-boosters-me06-mega-evolution-regne-delta/p/261789", "status": "actif"},
+        {"store": "Micromania (tirage au sort)", "link": "https://bit.ly/4zko84T", "status": "test", "_note": "page du tirage réservé Premium/Ultimate, pas une fiche produit"}
+      ]
+    }
+  ]
+}
