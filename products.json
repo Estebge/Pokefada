@@ -30,23 +30,26 @@
         {
           "store": "Micromania",
           "link": "https://bit.ly/42Roh10",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         },
         {
           "store": "BCD Jeux",
           "link": "https://bit.ly/4uooODH",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Pokémon TCG (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré",
           "link": "https://bit.ly/42L2Z5l",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "JouéClub",
           "link": "https://bit.ly/42OMlBU",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "KingJouet",
@@ -69,13 +72,14 @@
         {
           "store": "LaGrandeRécré (autre accès)",
           "link": "https://bit.ly/42Ktw2H",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "JouéClub (autre accès)",
           "link": "https://bit.ly/4dW7OPn",
-          "status": "test"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "Amazon",
@@ -111,12 +115,14 @@
         {
           "store": "Micromania",
           "link": "https://chocobp.com/1903xr",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         },
         {
           "store": "BCD Jeux",
           "link": "https://bit.ly/4tV9OMJ",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Pokémon TCG (vérifié le 29/10)"
         },
         {
           "store": "Cultura",
@@ -127,13 +133,14 @@
         {
           "store": "LaGrandeRécré",
           "link": "https://bit.ly/4uqiUC3",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "JouéClub",
           "link": "https://bit.ly/4fy5IXd",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "Cdiscount",
@@ -150,13 +157,14 @@
         {
           "store": "LaGrandeRécré (autre accès)",
           "link": "https://bit.ly/49hYrXH",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "JouéClub (autre accès)",
           "link": "https://bit.ly/4v8wIkV",
-          "status": "test"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "Amazon",
@@ -197,7 +205,8 @@
         {
           "store": "Micromania",
           "link": "https://bit.ly/4fv3cj9",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         },
         {
           "store": "Cultura",
@@ -208,13 +217,14 @@
         {
           "store": "JouéClub",
           "link": "https://bit.ly/3RDPFO8",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré",
           "link": "https://bit.ly/4pvegBo",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "KingJouet",
@@ -231,13 +241,14 @@
         {
           "store": "JouéClub (listing)",
           "link": "https://bit.ly/3RhY2Pi",
-          "status": "test"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré (listing)",
           "link": "https://bit.ly/458zJXe",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "Amazon",
@@ -273,12 +284,14 @@
         {
           "store": "Micromania",
           "link": "https://chocobp.com/zimlrp",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         },
         {
           "store": "BCD Jeux",
           "link": "https://chocobp.com/bcq0u7",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Pokémon TCG (vérifié le 29/10)"
         },
         {
           "store": "Cultura",
@@ -289,13 +302,14 @@
         {
           "store": "JouéClub",
           "link": "https://bit.ly/4fn3jgk",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré",
           "link": "https://bit.ly/4f8ox2R",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "KingJouet",
@@ -306,13 +320,14 @@
         {
           "store": "JouéClub (listing)",
           "link": "https://bit.ly/4pnYoQS",
-          "status": "test"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré (listing)",
           "link": "https://bit.ly/4wOVR4Q",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "Amazon",
@@ -348,7 +363,8 @@
         {
           "store": "Micromania",
           "link": "https://bit.ly/4hmXaTy",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         },
         {
           "store": "1001Hobbies",
@@ -364,13 +380,14 @@
         {
           "store": "JouéClub",
           "link": "https://bit.ly/4xlGK2x",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré",
           "link": "https://bit.ly/4xxmTOf",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "Fnac (listing)",
@@ -406,18 +423,20 @@
         {
           "store": "BCD Jeux",
           "url": "https://www.bcd-jeux.fr/pokemon-tcg/39594--pokemon-anniversaire-30-ans-bundle-6-boosters-pokemon-0196214145221.html",
-          "status": "actif"
+          "status": "test",
+          "_note": "vraie fiche, mais stock lu par motif brut (peu fiable)"
         },
         {
           "store": "JouéClub",
           "link": "https://bit.ly/4xQH2yF",
-          "status": "actif"
+          "status": "off",
+          "_note": "le lien mène à une recherche par code-barres sans résultat Pokémon (vérifié le 29/10)"
         },
         {
           "store": "LaGrandeRécré",
           "link": "https://bit.ly/4yCbpdt",
-          "status": "test",
-          "_note": "le lien mène à une page de recherche (plusieurs produits) : faux « en stock »"
+          "status": "off",
+          "_note": "le lien mène à la catégorie Cartes à collectionner (vérifié le 29/10)"
         },
         {
           "store": "KingJouet",
@@ -447,8 +466,8 @@
         {
           "store": "Micromania (tirage au sort)",
           "link": "https://bit.ly/4zko84T",
-          "status": "test",
-          "_note": "page du tirage réservé Premium/Ultimate, pas une fiche produit"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         }
       ]
     },
@@ -466,8 +485,8 @@
         {
           "store": "Micromania (tirage au sort)",
           "link": "https://bit.ly/4zko84T",
-          "status": "test",
-          "_note": "page du tirage réservé Premium/Ultimate, pas une fiche produit"
+          "status": "off",
+          "_note": "le lien mène à une page de vente réservée terminée (vérifié le 29/10)"
         }
       ]
     }

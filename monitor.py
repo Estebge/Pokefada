@@ -47,7 +47,10 @@ MERCHANT_DOMAINS = [
 ]
 
 IN_STATUSES = {"in_stock", "preorder"}
-PROBLEM_STATUSES = {"blocked", "error", "unknown", "lien"}
+PROBLEM_STATUSES = {"blocked", "error", "unknown", "lien", "liste"}
+# seules ces lectures déclenchent une alerte (sauf "trust_text": true dans l'offre)
+RELIABLE_SOURCES = {"json-ld", "meta", "regex"}
+LISTING_TITLE = re.compile(r"r[ée]sultat|recherche|vente termin|cat[ée]gorie", re.I)
 PROBLEM_THRESHOLD = 3            # passages en échec d'affilée avant de te prévenir (~30 min)
 LINK_RETRY_SECONDS = 6 * 3600    # un lien raccourci non résolu est retenté toutes les 6 h
 
@@ -76,13 +79,14 @@ PROBLEM_LABEL = {
     "error": "erreur du site",
     "unknown": "stock illisible",
     "lien": "lien non résolu",
+    "liste": "pas une fiche produit",
 }
 STATUS_LABEL = {
     "in_stock": "en stock", "preorder": "précommande", "out_of_stock": "rupture",
     **PROBLEM_LABEL,
 }
 ICONS = {"in_stock": "🟢", "preorder": "🟡", "out_of_stock": "🔴",
-         "blocked": "⛔", "error": "⛔", "unknown": "❓", "lien": "🔗"}
+         "blocked": "⛔", "error": "⛔", "unknown": "❓", "lien": "🔗", "liste": "📋"}
 
 
 # ================================================================ liens
@@ -368,6 +372,42 @@ def diagnose(r):
     }
 
 
+def top_level_products(html):
+    """Nombre de produits décrits en JSON-LD au premier niveau (une fiche n'en a qu'un)."""
+    count = 0
+    for m in LD_RE.finditer(html):
+        try:
+            data = json.loads(m.group(1).strip())
+        except ValueError:
+            continue
+        nodes = data if isinstance(data, list) else data.get("@graph", [data]) if isinstance(data, dict) else []
+        for node in nodes:
+            if not isinstance(node, dict):
+                continue
+            t = node.get("@type")
+            types = t if isinstance(t, list) else [t]
+            if "ItemList" in types and len(node.get("itemListElement") or []) > 1:
+                return 99
+            if "Product" in types:
+                count += 1
+    return count
+
+
+def listing_reason(r):
+    """Raison de penser que la page n'est pas une fiche produit (recherche, catégorie...)."""
+    title = re.search(r"<title[^>]*>(.*?)</title>", r.text, re.I | re.S)
+    if title:
+        t = re.sub(r"\s+", " ", unescape(title.group(1))).strip()
+        if LISTING_TITLE.search(t):
+            return f"titre « {t[:60]} »"
+    if re.search(r"recherche|search|resultat", urlsplit(r.url).path, re.I):
+        return "adresse de recherche"
+    n = top_level_products(r.text)
+    if n > 1:
+        return "plusieurs produits sur la page"
+    return None
+
+
 def check_page(url, offer, session):
     try:
         r = session.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
@@ -380,6 +420,9 @@ def check_page(url, offer, session):
         return {"status": "error", "price": None, "source": "HTTP 404 (lien mort ?)", "diag": diag}
     if r.status_code >= 400:
         return {"status": "error", "price": None, "source": f"HTTP {r.status_code}", "diag": diag}
+    reason = listing_reason(r)
+    if reason and not offer.get("allow_listing"):
+        return {"status": "liste", "price": None, "source": reason, "diag": diag}
     status, price, source = analyse(r.text, offer)
     return {"status": status, "price": price, "source": source, "diag": diag}
 
@@ -584,19 +627,22 @@ def run(args):
         st["problems"] = 0
 
         price_ok = max_price is None or price is None or price <= max_price
-        alertable = status in IN_STATUSES and price_ok
+        reliable = source in RELIABLE_SOURCES or o.get("trust_text")
+        alertable = status in IN_STATUSES and price_ok and reliable
         if alertable and not st["alerted"]:
             kind = "PRÉCOMMANDE" if status == "preorder" else "EN STOCK"
             lines = [f"🚨 **{kind}** : {p['name']}", f"🏬 {o['store']}  •  💶 {fmt_price(price)}"]
             if price is None and max_price is not None:
                 lines.append(f"⚠️ prix non lu, vérifie qu'il est ≤ {fmt_price(max_price)}")
-            if source in ("texte", "regex", "motif brut"):
+            if source not in ("json-ld", "meta"):
                 lines.append(f"ℹ️ détection par {source} (moins fiable)")
             lines.append(r["url"])
             if notify("@everyone " + "\n".join(lines)):
                 st["alerted"] = True
         elif not alertable:
-            if status in IN_STATUSES:
+            if status in IN_STATUSES and not reliable:
+                print(f"  (en stock lu via {source}, peu fiable : pas d'alerte)")
+            elif status in IN_STATUSES:
                 print(f"  (en stock mais {fmt_price(price)} > {fmt_price(max_price)}, pas d'alerte)")
             st["alerted"] = False
         st["status"], st["price"] = status, price
@@ -623,9 +669,9 @@ def send_test_report(products, offers, results, notify):
         by_product[p["id"]].append(o)
 
     notify("🧪 **Test Pokéfada** : ce que le script lit sur chaque page\n"
-           "🟢 en stock • 🟡 précommande • 🔴 rupture • ⛔ bloqué/erreur • ❓ illisible • 🔗 lien non résolu\n"
+           "🟢 en stock • 🟡 précommande • 🔴 rupture • ⛔ bloqué/erreur • ❓ illisible • 🔗 lien non résolu • 📋 pas une fiche produit\n"
            "*(test)* = offre désactivée en temps normal • lu via json-ld/meta = fiable, "
-           "via texte/motif brut = à vérifier")
+           "via texte/motif brut = pas d'alerte")
     for p in products:
         if p["id"] not in by_product:
             continue
