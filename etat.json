@@ -2,17 +2,17 @@
   "fiches": {
     "bundle-me04|LaGrandeRécré": {
       "preuve": "code-barres",
-      "ts": 1793385877,
+      "ts": 1793400053,
       "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
     },
     "bundle-me05|LaGrandeRécré": {
       "preuve": "code-barres",
-      "ts": 1793385877,
+      "ts": 1793400053,
       "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
     },
     "etb-me05|LaGrandeRécré": {
       "preuve": "code-barres",
-      "ts": 1793385877,
+      "ts": 1793400053,
       "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
     }
   },
@@ -58,7 +58,7 @@
     "1001Hobbies": {
       "diag": "recherche bloquée (HTTP 403)",
       "template": null,
-      "ts": 1793307220
+      "ts": 1793400053
     },
     "BCD Jeux": {
       "diag": "recherche OK (42 liens Pokémon)",
@@ -83,7 +83,7 @@
     "Micromania": {
       "diag": "page de recherche sans liens produit lisibles (HTTP 200, 0 ko, titre « (aucun) », mots : aucun)",
       "template": null,
-      "ts": 1793307220
+      "ts": 1793400053
     }
   },
   "offres": {
@@ -161,7 +161,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": true,
-      "problems": 5,
+      "problems": 6,
       "status": null
     },
     "bundle-me04|Micromania": {
@@ -203,7 +203,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": true,
-      "problems": 5,
+      "problems": 6,
       "status": null
     },
     "bundle-me05|Micromania": {
@@ -371,7 +371,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": true,
-      "problems": 5,
+      "problems": 6,
       "status": null
     },
     "etb-me05|Micromania": {
@@ -427,23 +427,23 @@
   "recherches": {
     "bundle-30ans|E.Leclerc": 1793385877,
     "bundle-30ans|JouéClub": 1793385877,
-    "bundle-me04|BCD Jeux": 1793366650,
-    "bundle-me04|E.Leclerc": 1793366650,
-    "bundle-me04|JouéClub": 1793366650,
-    "bundle-me04|LaGrandeRécré": 1793385877,
+    "bundle-me04|BCD Jeux": 1793400053,
+    "bundle-me04|E.Leclerc": 1793400053,
+    "bundle-me04|JouéClub": 1793400053,
+    "bundle-me04|LaGrandeRécré": 1793400053,
     "bundle-me05|BCD Jeux": 1793385877,
-    "bundle-me05|E.Leclerc": 1793366650,
+    "bundle-me05|E.Leclerc": 1793400053,
     "bundle-me05|JouéClub": 1793385877,
-    "bundle-me05|LaGrandeRécré": 1793385877,
+    "bundle-me05|LaGrandeRécré": 1793400053,
     "bundle-me06|E.Leclerc": 1793385877,
     "etb-30ans|BCD Jeux": 1793385877,
-    "etb-30ans|E.Leclerc": 1793366650,
+    "etb-30ans|E.Leclerc": 1793400053,
     "etb-30ans|JouéClub": 1793385877,
-    "etb-me04|BCD Jeux": 1793366650,
-    "etb-me04|JouéClub": 1793366650,
-    "etb-me05|BCD Jeux": 1793366650,
-    "etb-me05|JouéClub": 1793366650,
-    "etb-me05|LaGrandeRécré": 1793385877,
+    "etb-me04|BCD Jeux": 1793400053,
+    "etb-me04|JouéClub": 1793400053,
+    "etb-me05|BCD Jeux": 1793400053,
+    "etb-me05|JouéClub": 1793400053,
+    "etb-me05|LaGrandeRécré": 1793400053,
     "etb-me06|BCD Jeux": 1793385877,
     "etb-me06|E.Leclerc": 1793385877
   }
