@@ -10,6 +10,13 @@ Usage :
     python monitor.py --test     récap sur Discord de ce que le script lit pour chaque produit
                                  et chaque magasin, sans toucher à etat.json
     python monitor.py --dry-run  comme un passage normal, mais n'envoie rien et n'écrit rien
+    python monitor.py --loop     tourne en continu : un passage toutes les 30 s (--interval N
+                                 pour changer), jusqu'à Ctrl+C. À lancer sur une machine
+                                 allumée en permanence (PC, Raspberry Pi, petit serveur).
+
+Alertes : une offre qui passe disponible sous le prix max (ou en file d'attente) est
+signalée tout de suite ; une offre déjà signalée et toujours disponible est rappelée dans
+un récap toutes les 12 h.
 
 L'URL du webhook Discord se lit dans la variable d'environnement DISCORD_WEBHOOK_URL
 (Secret GitHub). Elle n'est jamais écrite dans le code ni dans les logs.
@@ -51,13 +58,16 @@ MERCHANT_DOMAINS = [
     "king-jouet.com", "smythstoys.com",
 ]
 
-IN_STATUSES = {"in_stock", "preorder"}
+IN_STATUSES = {"in_stock", "preorder", "queue"}
 PROBLEM_STATUSES = {"blocked", "error", "unknown", "lien", "liste", "autre"}
 # seules ces lectures déclenchent une alerte (sauf "trust_text": true dans l'offre)
-RELIABLE_SOURCES = {"json-ld", "meta", "regex"}
+RELIABLE_SOURCES = {"json-ld", "meta", "regex", "file d'attente"}
 LISTING_TITLE = re.compile(r"r[ée]sultat|recherche|vente termin|cat[ée]gorie", re.I)
-PROBLEM_THRESHOLD = 3            # passages en échec d'affilée avant de te prévenir (~30 min)
+PROBLEM_THRESHOLD = {"normal": 3, "loop": 60}   # passages en échec d'affilée avant de te prévenir
+                                                # (~30 min dans les deux modes)
 LINK_RETRY_SECONDS = 6 * 3600    # un lien raccourci non résolu est retenté toutes les 6 h
+DIGEST_SECONDS = 12 * 3600       # récap des produits toujours dispo (déjà signalés) toutes les 12 h
+LOOP_INTERVAL = 30               # mode --loop : un passage toutes les 30 s
 
 OUT_MARKERS = [
     "rupture de stock", "indisponible", "épuisé", "epuise", "out of stock",
@@ -72,7 +82,19 @@ IN_MARKERS = [
 CHALLENGE_TITLES = ("just a moment", "attention required", "access denied", "accès refusé",
                     "un instant", "robot check", "are you a human", "pardon our interruption")
 CHALLENGE_MARKERS = ("captcha-delivery.com", "cf-chl-widget", "challenges.cloudflare.com/turnstile",
-                     "px-captcha", "verify you are human", "vérifiez que vous êtes humain")
+                     "px-captcha", "verify you are human", "vérifiez que vous êtes humain",
+                     "_incapsula_resource")
+# Files d'attente (Queue-it et salles d'attente maison) : signe qu'une vente démarre.
+QUEUE_TITLES = re.compile(r"file d.attente|salle d.attente|waiting room|queue-it|you are (?:now )?in (?:the )?(?:line|queue)", re.I)
+
+
+def looks_like_queue(r):
+    """Vrai si la réponse est une page de file d'attente."""
+    host = host_of(r.url)
+    if "queue-it" in host or host.startswith("queue."):
+        return True
+    title = re.search(r"<title[^>]*>(.*?)</title>", r.text[:20000], re.I | re.S)
+    return bool(title and QUEUE_TITLES.search(unescape(title.group(1))))
 
 
 def looks_like_challenge(html):
@@ -100,12 +122,12 @@ PROBLEM_LABEL = {
     "autre": "page changée",
 }
 STATUS_LABEL = {
-    "in_stock": "en stock", "preorder": "précommande", "out_of_stock": "rupture",
+    "in_stock": "en stock", "preorder": "précommande", "queue": "file d'attente", "out_of_stock": "rupture",
     "absent": "pas trouvé dans ce magasin", "attente": "recherche au prochain passage",
     "recherche": "recherche du site illisible",
     **PROBLEM_LABEL,
 }
-ICONS = {"in_stock": "🟢", "preorder": "🟡", "out_of_stock": "🔴",
+ICONS = {"in_stock": "🟢", "preorder": "🟡", "queue": "🚦", "out_of_stock": "🔴",
          "blocked": "⛔", "error": "⛔", "unknown": "❓", "lien": "🔗", "liste": "📋", "autre": "📋",
          "absent": "⚪", "attente": "⏳", "recherche": "❔"}
 
@@ -476,8 +498,13 @@ def page_product_name(html):
 
 def verify(product, html):
     """La page est-elle bien la fiche de ce produit ? Retourne la preuve ou None."""
-    if product.get("ean") and ean_in(html, product["ean"]):
-        return "code-barres"
+    if product.get("ean"):
+        # une page de recherche ou d'accueil répète le code-barres cherché (?q=..., champ de
+        # recherche) : ces occurrences ne prouvent rien, on les retire avant de chercher
+        digits = product["ean"].lstrip("0")
+        page = re.sub(rf"""(?:=|value=["'])0*{digits}(?!\d)""", " ", html)
+        if ean_in(page, product["ean"]):
+            return "code-barres"
     if product.get("must") and name_matches(product, page_product_name(html)):
         return "nom du produit"
     return None
@@ -502,8 +529,10 @@ DEFAULT_TEMPLATES = ["/recherche?q={q}", "/search?q={q}", "/recherche?controller
 PROBE_QUERY = "pokemon"
 PROBE_TTL = 7 * 24 * 3600        # le format de recherche d'un magasin est revérifié chaque semaine
 PROBE_RETRY = 24 * 3600          # un magasin dont la recherche est illisible est retenté chaque jour
-SEARCH_RETRY = 6 * 3600          # un produit introuvable est recherché de nouveau toutes les 6 h
-SEARCH_BUDGET = {"normal": 3, "test": 99}   # recherches de produits par magasin et par passage
+# un produit introuvable est recherché de nouveau toutes les 6 h (10 min en mode --loop, pour
+# repérer vite une fiche qui vient d'apparaître)
+SEARCH_RETRY = {"normal": 6 * 3600, "loop": 10 * 60}
+SEARCH_BUDGET = {"normal": 3, "loop": 2, "test": 99}   # recherches de produits par magasin et par passage
 
 
 def same_site(url, domain):
@@ -637,11 +666,14 @@ def search_product(product, store, template, session):
 
 # ================================================================ lecture d'une fiche
 
-def evaluate(r, product, offer):
-    """Transforme la réponse d'une fiche en résultat (statut, prix, source...)."""
+def evaluate(r, product, offer, from_search=False):
+    """Transforme la réponse d'une fiche en résultat (statut, prix, source...).
+    from_search : la réponse vient d'une recherche, une redirection y est normale."""
     if r is None:
         return {"status": "error", "price": None, "source": "pas de réponse", "diag": None}
     diag = diagnose(r)
+    if looks_like_queue(r):
+        return {"status": "queue", "price": None, "source": "file d'attente", "diag": diag}
     if r.status_code in (401, 403, 429, 503):
         return {"status": "blocked", "price": None, "source": f"HTTP {r.status_code}", "diag": diag}
     if r.status_code in (404, 410):
@@ -652,6 +684,14 @@ def evaluate(r, product, offer):
     reason = listing_reason(r)
     if reason and not offer.get("allow_listing"):
         return {"status": "liste", "price": None, "source": reason, "diag": diag, "gone": True}
+    if r.history and not from_search and not offer.get("allow_listing"):
+        # fiche retirée : le site renvoie vers une catégorie ou l'accueil, dont le texte
+        # (« ajouter au panier » d'autres articles) donnerait un faux « en stock »
+        before = urlsplit(r.history[0].url).path.rstrip("/").lower()
+        after = urlsplit(r.url).path.rstrip("/").lower()
+        if before != after:
+            return {"status": "autre", "price": None, "source": f"redirigé vers {after or '/'}",
+                    "diag": diag, "gone": True}
     proof = verify(product, r.text)
     if not proof and offer.get("auto"):
         return {"status": "autre", "price": None, "source": "la page ne montre plus ce produit",
@@ -718,7 +758,7 @@ def check_store(job):
                         "diag": None, "url": None, "via": "recherche"}
             continue
         last = tries.get(pid, 0)
-        if mode == "normal" and now - last < SEARCH_RETRY:
+        if mode != "test" and now - last < SEARCH_RETRY[mode]:
             out.setdefault(pid, {"status": "absent", "price": None, "source": "pas trouvé dans ce magasin",
                                  "diag": None, "url": None, "via": "recherche"})
             continue
@@ -735,7 +775,7 @@ def check_store(job):
                         "url": None, "via": "recherche"}
             continue
         fiches[pid] = {"url": url, "ts": now, "preuve": proof}
-        res = evaluate(r, product, offer)
+        res = evaluate(r, product, offer, from_search=True)
         res.update(url=url, via=f"recherche ({proof})", new=True)
         out[pid] = res
     return out, notes
@@ -885,32 +925,63 @@ def write_github_summary(rows, results):
         f.write("\n".join(lines) + "\n")
 
 
-def run(args):
-    cfg = load_config()
-    if not cfg:
-        print("products.json est vide, illisible ou à l'ancien format.")
-        return 1
+STATE_KEYS = ("offres", "liens", "fiches", "recherches", "moteurs")
 
+
+def load_state():
+    state = load_json(STATE_FILE, {})
+    if not isinstance(state, dict):
+        state = {}
+    for key in STATE_KEYS:
+        state.setdefault(key, {})
+    # oublie les entrées d'anciennes versions du script (clés = adresses de fiches)
+    for key in [k for k in state if k not in STATE_KEYS and k != "recap_ts"]:
+        del state[key]
+    return state
+
+
+def get_notifier(args):
+    """Retourne la fonction d'envoi Discord, ou None si le webhook manque."""
     webhook = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
     sending = not args.dry_run
     if sending and not re.match(r"^https://(?:\w+\.)?(?:discord|discordapp)\.com/api/webhooks/", webhook):
-        print("DISCORD_WEBHOOK_URL absent ou invalide (Secret GitHub à créer).")
-        return 1
+        print("DISCORD_WEBHOOK_URL absent ou invalide (Secret GitHub, ou variable d'environnement en local).")
+        return None
 
     def notify(text):
         print("DISCORD>", text.replace("\n", " | "))
         return send_discord(webhook, text) if sending else True
+    return notify
 
-    state = load_json(STATE_FILE, {})
-    if not isinstance(state, dict):
-        state = {}
-    for key in ("offres", "liens", "fiches", "recherches", "moteurs"):
-        state.setdefault(key, {})
+
+def alert_lines(p, store, r):
+    status, price, max_price = r["status"], r["price"], p.get("max_price")
+    kind = {"preorder": "PRÉCOMMANDE", "queue": "FILE D'ATTENTE"}.get(status, "EN STOCK")
+    icon = "🚦" if status == "queue" else "🚨"
+    lines = [f"{icon} **{kind}** : {p['name']}", f"🏬 {store}  •  💶 {fmt_price(price)}"]
+    if price is None and max_price is not None:
+        lines.append(f"⚠️ prix non lu, vérifie qu'il est ≤ {fmt_price(max_price)}")
+    if r["source"] not in ("json-ld", "meta", "file d'attente"):
+        lines.append(f"ℹ️ détection par {r['source']} (moins fiable)")
+    lines.append(r["url"])
+    return lines
+
+
+def run(args, notify, state=None):
+    """Un passage complet. `state` : état gardé en mémoire (mode --loop), sinon lu sur disque."""
+    cfg = load_config()
+    if not cfg:
+        print("products.json est vide, illisible ou à l'ancien format.")
+        return 1
+    if state is None:
+        state = load_state()
+    mode = "test" if args.test else "loop" if args.loop else "normal"
+    verbose = mode != "loop"
+    now = int(time.time())
 
     jobs, rows, stores = build_jobs(cfg, args.test)
     resolve_all([(p, o) for p, _, _, o in rows if not o.get("auto")], state, force=args.test)
 
-    mode = "test" if args.test else "normal"
     results, notes = {}, {}
     if jobs:
         with ThreadPoolExecutor(max_workers=min(20, len(jobs))) as ex:
@@ -921,16 +992,21 @@ def run(args):
                 results.update(res)
                 notes[name] = n
 
-    for p, store, pid, _ in rows:
-        r = results[pid]
-        print(f"- {p['name']} [{store}] -> {r['status']} / {describe(r)}")
+    if verbose:
+        for p, store, pid, _ in rows:
+            r = results[pid]
+            print(f"- {p['name']} [{store}] -> {r['status']} / {describe(r)}")
     write_github_summary(rows, results)
 
     if args.test:
         return send_test_report(cfg, rows, results, notes, notify)
 
-    # décisions d'alerte
-    new_problems, recovered, found = [], [], []
+    # décisions d'alerte :
+    # - offre qui devient disponible sous le prix max (jamais signalée, ou revenue après une
+    #   rupture / un prix trop haut) : alerte immédiate ;
+    # - offre déjà signalée et toujours disponible : rappel groupé toutes les 12 h.
+    new_problems, recovered, found, still = [], [], [], []
+    threshold = PROBLEM_THRESHOLD["loop" if mode == "loop" else "normal"]
     seen = set()
     for p, store, pid, offer in rows:
         seen.add(pid)
@@ -944,11 +1020,11 @@ def run(args):
 
         if status in PROBLEM_STATUSES:
             st["problems"] += 1
-            if st["problems"] >= PROBLEM_THRESHOLD and not st["problem_notified"]:
+            if st["problems"] >= threshold and not st["problem_notified"]:
                 new_problems.append(f"• {p['name']} — {store} : "
                                     f"{PROBLEM_LABEL.get(status, status)} ({no_ping(r['source'])})")
                 st["problem_notified"] = True
-            continue
+            continue        # un échec de lecture ne remet pas l'alerte à zéro
         if st["problem_notified"]:
             recovered.append(f"• {p['name']} — {store}")
             st["problem_notified"] = False
@@ -958,41 +1034,68 @@ def run(args):
         reliable = is_reliable(r, offer)
         alertable = status in IN_STATUSES and price_ok and reliable
         if alertable and not st["alerted"]:
-            kind = "PRÉCOMMANDE" if status == "preorder" else "EN STOCK"
-            lines = [f"🚨 **{kind}** : {p['name']}", f"🏬 {store}  •  💶 {fmt_price(price)}"]
-            if price is None and max_price is not None:
-                lines.append(f"⚠️ prix non lu, vérifie qu'il est ≤ {fmt_price(max_price)}")
-            if r["source"] not in ("json-ld", "meta"):
-                lines.append(f"ℹ️ détection par {r['source']} (moins fiable)")
-            lines.append(r["url"])
-            if notify("@everyone " + "\n".join(lines)):
+            if notify("@everyone " + "\n".join(alert_lines(p, store, r))):
                 st["alerted"] = True
-        elif not alertable:
-            if status in IN_STATUSES and not reliable:
-                print(f"  (en stock lu via {r['source']}, peu fiable : pas d'alerte)")
-            elif status in IN_STATUSES:
-                print(f"  (en stock mais {fmt_price(price)} > {fmt_price(max_price)}, pas d'alerte)")
+                st["since"] = now
+        elif alertable:
+            since = time.strftime("%d/%m %H:%M", time.localtime(st.get("since", now)))
+            still.append(f"• {p['name']} — {store} : {STATUS_LABEL[status]}, {fmt_price(price)} "
+                         f"(depuis le {since})\n  {r['url']}")
+        else:
+            if verbose and status in IN_STATUSES and not reliable:
+                print(f"  ({p['name']} [{store}] en stock lu via {r['source']}, peu fiable : pas d'alerte)")
+            elif verbose and status in IN_STATUSES:
+                print(f"  ({p['name']} [{store}] en stock mais {fmt_price(price)} > "
+                      f"{fmt_price(max_price)}, pas d'alerte)")
             st["alerted"] = False
+            st.pop("since", None)
         st["status"], st["price"] = status, price
 
     if found:
         for msg in chunks(["🔎 **Nouvelles fiches trouvées** (surveillées à partir de maintenant) :"] + found):
             notify(msg)
     if new_problems:
-        head = (f"⚠️ **Pages que je ne peux plus surveiller** (depuis {PROBLEM_THRESHOLD} passages) "
-                f"— aucune alerte possible pour elles tant que ça dure :")
+        head = ("⚠️ **Pages que je ne peux plus surveiller** (depuis ~30 min) "
+                "— aucune alerte possible pour elles tant que ça dure :")
         for msg in chunks([head] + new_problems):
             notify(msg)
     if recovered:
         for msg in chunks(["✅ **Surveillance rétablie** :"] + recovered):
             notify(msg)
 
+    # rappel toutes les 12 h des offres déjà signalées et toujours disponibles
+    if "recap_ts" not in state:
+        state["recap_ts"] = now
+    elif now - state["recap_ts"] >= DIGEST_SECONDS:
+        if still:
+            for msg in chunks(["🔁 **Toujours disponibles** (déjà signalés) :"] + still):
+                notify(msg)
+        state["recap_ts"] = now
+
     # oublie ce qui a été retiré de products.json
     for key in ("offres", "fiches", "recherches"):
         state[key] = {k: v for k, v in state[key].items() if k in seen}
     if not args.dry_run:
         save_state(state)
+    if not verbose:
+        dispo = sum(1 for pid in seen if state["offres"][pid].get("alerted"))
+        print(f"{time.strftime('%H:%M:%S')} passage OK : {len(rows)} offres, "
+              f"{dispo} dispo sous le prix max" + (f", {len(found)} nouvelle(s) fiche(s)" if found else ""))
     return 0
+
+
+def loop(args, notify):
+    """Mode --loop : un passage toutes les `interval` secondes, jusqu'à Ctrl+C."""
+    state = load_state()
+    notify(f"▶️ Pokéfada démarré : vérification toutes les {args.interval} s, "
+           f"rappel des produits toujours dispo toutes les {DIGEST_SECONDS // 3600} h.")
+    while True:
+        start = time.time()
+        try:
+            run(args, notify, state)
+        except Exception as e:              # une erreur imprévue ne doit pas arrêter la surveillance
+            print(f"{time.strftime('%H:%M:%S')} ! passage en erreur : {type(e).__name__}: {e}")
+        time.sleep(max(1.0, args.interval - (time.time() - start)))
 
 
 def send_test_report(cfg, rows, results, notes, notify):
@@ -1043,7 +1146,23 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("--test", action="store_true", help="récap Discord, sans toucher à l'état")
     parser.add_argument("--dry-run", action="store_true", help="aucun envoi Discord, aucune écriture")
-    sys.exit(run(parser.parse_args()))
+    parser.add_argument("--loop", action="store_true",
+                        help=f"tourne en continu (un passage toutes les {LOOP_INTERVAL} s), jusqu'à Ctrl+C")
+    parser.add_argument("--interval", type=int, default=LOOP_INTERVAL,
+                        help="secondes entre deux passages (avec --loop)")
+    args = parser.parse_args()
+    if args.loop and args.test:
+        parser.error("--loop et --test ne vont pas ensemble")
+    notify = get_notifier(args)
+    if notify is None:
+        sys.exit(1)
+    if args.loop:
+        try:
+            loop(args, notify)
+        except KeyboardInterrupt:
+            print("arrêt demandé.")
+        sys.exit(0)
+    sys.exit(run(args, notify))
 
 
 if __name__ == "__main__":
