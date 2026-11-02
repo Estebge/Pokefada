@@ -1,42 +1,5 @@
 {
-  "fiches": {
-    "bundle-me04|LaGrandeRécré": {
-      "preuve": "code-barres",
-      "ts": 1793607908,
-      "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
-    },
-    "bundle-me05|LaGrandeRécré": {
-      "preuve": "code-barres",
-      "ts": 1793607908,
-      "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
-    },
-    "etb-me05|LaGrandeRécré": {
-      "preuve": "code-barres",
-      "ts": 1793607908,
-      "url": "https://www.lagranderecre.fr/la-grande-recre/page-d-accueil.html"
-    }
-  },
-  "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-30eme-anniversaire/p/261821": {
-    "alerted": false,
-    "price": null,
-    "problem_notified": true,
-    "problems": 90,
-    "status": null
-  },
-  "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-coffret-dresseur-delite-me04-mega-evolution-chaos-ascendant/p/260763": {
-    "alerted": false,
-    "price": null,
-    "problem_notified": true,
-    "problems": 90,
-    "status": null
-  },
-  "https://www.smythstoys.com/fr/fr-fr/jouets/jeux-de-societe-et-puzzles/cartes-a-collectionner/cartes-pokemon/pokemon-mega-evolution-nuit-noire-me05-bundle-6-boosters/p/260783": {
-    "alerted": false,
-    "price": null,
-    "problem_notified": true,
-    "problems": 90,
-    "status": null
-  },
+  "fiches": {},
   "liens": {
     "https://bit.ly/3UXsv6C": {
       "err": null,
@@ -160,9 +123,9 @@
     "bundle-me04|LaGrandeRécré": {
       "alerted": false,
       "price": null,
-      "problem_notified": true,
-      "problems": 18,
-      "status": null
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
     },
     "bundle-me04|Micromania": {
       "alerted": false,
@@ -202,9 +165,9 @@
     "bundle-me05|LaGrandeRécré": {
       "alerted": false,
       "price": null,
-      "problem_notified": true,
-      "problems": 18,
-      "status": null
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
     },
     "bundle-me05|Micromania": {
       "alerted": false,
@@ -329,7 +292,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": false,
-      "problems": 0,
+      "problems": 1,
       "status": "in_stock"
     },
     "etb-me04|Micromania": {
@@ -370,9 +333,9 @@
     "etb-me05|LaGrandeRécré": {
       "alerted": false,
       "price": null,
-      "problem_notified": true,
-      "problems": 18,
-      "status": null
+      "problem_notified": false,
+      "problems": 0,
+      "status": "absent"
     },
     "etb-me05|Micromania": {
       "alerted": false,
@@ -424,26 +387,27 @@
       "status": "recherche"
     }
   },
+  "recap_ts": 1793644906,
   "recherches": {
     "bundle-30ans|E.Leclerc": 1793584062,
     "bundle-30ans|JouéClub": 1793584062,
-    "bundle-me04|BCD Jeux": 1793607908,
-    "bundle-me04|E.Leclerc": 1793607908,
-    "bundle-me04|JouéClub": 1793607908,
-    "bundle-me04|LaGrandeRécré": 1793607908,
+    "bundle-me04|BCD Jeux": 1793644906,
+    "bundle-me04|E.Leclerc": 1793644906,
+    "bundle-me04|JouéClub": 1793644906,
+    "bundle-me04|LaGrandeRécré": 1793644906,
     "bundle-me05|BCD Jeux": 1793584062,
-    "bundle-me05|E.Leclerc": 1793607908,
+    "bundle-me05|E.Leclerc": 1793644906,
     "bundle-me05|JouéClub": 1793584062,
-    "bundle-me05|LaGrandeRécré": 1793607908,
+    "bundle-me05|LaGrandeRécré": 1793644906,
     "bundle-me06|E.Leclerc": 1793584062,
     "etb-30ans|BCD Jeux": 1793584062,
-    "etb-30ans|E.Leclerc": 1793607908,
+    "etb-30ans|E.Leclerc": 1793644906,
     "etb-30ans|JouéClub": 1793584062,
-    "etb-me04|BCD Jeux": 1793607908,
-    "etb-me04|JouéClub": 1793607908,
-    "etb-me05|BCD Jeux": 1793607908,
-    "etb-me05|JouéClub": 1793607908,
-    "etb-me05|LaGrandeRécré": 1793607908,
+    "etb-me04|BCD Jeux": 1793644906,
+    "etb-me04|JouéClub": 1793644906,
+    "etb-me05|BCD Jeux": 1793644906,
+    "etb-me05|JouéClub": 1793644906,
+    "etb-me05|LaGrandeRécré": 1793644906,
     "etb-me06|BCD Jeux": 1793584062,
     "etb-me06|E.Leclerc": 1793584062
   }
