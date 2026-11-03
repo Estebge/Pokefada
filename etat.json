@@ -21,7 +21,7 @@
     "1001Hobbies": {
       "diag": "recherche bloquée (HTTP 403)",
       "template": null,
-      "ts": 1793584062
+      "ts": 1793692838
     },
     "BCD Jeux": {
       "diag": "recherche OK (42 liens Pokémon)",
@@ -44,9 +44,9 @@
       "ts": 1793307220
     },
     "Micromania": {
-      "diag": "page de recherche sans liens produit lisibles (HTTP 200, 0 ko, titre « (aucun) », mots : aucun)",
+      "diag": "recherche bloquée (page anti-robot)",
       "template": null,
-      "ts": 1793584062
+      "ts": 1793692838
     }
   },
   "offres": {
@@ -276,7 +276,7 @@
     },
     "etb-me04|E.Leclerc": {
       "alerted": false,
-      "price": 98.73,
+      "price": 98.61,
       "problem_notified": false,
       "problems": 0,
       "status": "in_stock"
@@ -291,8 +291,8 @@
     "etb-me04|LaGrandeRécré": {
       "alerted": false,
       "price": null,
-      "problem_notified": false,
-      "problems": 2,
+      "problem_notified": true,
+      "problems": 3,
       "status": "in_stock"
     },
     "etb-me04|Micromania": {
@@ -387,27 +387,27 @@
       "status": "recherche"
     }
   },
-  "recap_ts": 1793644906,
+  "recap_ts": 1793692838,
   "recherches": {
     "bundle-30ans|E.Leclerc": 1793584062,
     "bundle-30ans|JouéClub": 1793584062,
-    "bundle-me04|BCD Jeux": 1793668751,
-    "bundle-me04|E.Leclerc": 1793668751,
-    "bundle-me04|JouéClub": 1793668751,
-    "bundle-me04|LaGrandeRécré": 1793668751,
+    "bundle-me04|BCD Jeux": 1793692838,
+    "bundle-me04|E.Leclerc": 1793692838,
+    "bundle-me04|JouéClub": 1793692838,
+    "bundle-me04|LaGrandeRécré": 1793692838,
     "bundle-me05|BCD Jeux": 1793584062,
-    "bundle-me05|E.Leclerc": 1793668751,
+    "bundle-me05|E.Leclerc": 1793692838,
     "bundle-me05|JouéClub": 1793584062,
-    "bundle-me05|LaGrandeRécré": 1793668751,
+    "bundle-me05|LaGrandeRécré": 1793692838,
     "bundle-me06|E.Leclerc": 1793584062,
     "etb-30ans|BCD Jeux": 1793584062,
-    "etb-30ans|E.Leclerc": 1793668751,
+    "etb-30ans|E.Leclerc": 1793692838,
     "etb-30ans|JouéClub": 1793584062,
-    "etb-me04|BCD Jeux": 1793668751,
-    "etb-me04|JouéClub": 1793668751,
-    "etb-me05|BCD Jeux": 1793668751,
-    "etb-me05|JouéClub": 1793668751,
-    "etb-me05|LaGrandeRécré": 1793668751,
+    "etb-me04|BCD Jeux": 1793692838,
+    "etb-me04|JouéClub": 1793692838,
+    "etb-me05|BCD Jeux": 1793692838,
+    "etb-me05|JouéClub": 1793692838,
+    "etb-me05|LaGrandeRécré": 1793692838,
     "etb-me06|BCD Jeux": 1793584062,
     "etb-me06|E.Leclerc": 1793584062
   }
