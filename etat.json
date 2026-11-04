@@ -58,11 +58,12 @@
       "status": "recherche"
     },
     "bundle-30ans|BCD Jeux": {
-      "alerted": false,
+      "alerted": true,
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "out_of_stock"
+      "since": 1793756605,
+      "status": "in_stock"
     },
     "bundle-30ans|E.Leclerc": {
       "alerted": false,
@@ -276,7 +277,7 @@
     },
     "etb-me04|E.Leclerc": {
       "alerted": false,
-      "price": 98.61,
+      "price": 98.98,
       "problem_notified": false,
       "problems": 0,
       "status": "in_stock"
@@ -292,7 +293,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": true,
-      "problems": 5,
+      "problems": 6,
       "status": "in_stock"
     },
     "etb-me04|Micromania": {
@@ -392,24 +393,24 @@
     "bundle-30ans|E.Leclerc": 1793742418,
     "bundle-30ans|JouéClub": 1793742418,
     "bundle-30ans|LaGrandeRécré": 1793742418,
-    "bundle-me04|BCD Jeux": 1793722171,
-    "bundle-me04|E.Leclerc": 1793722171,
-    "bundle-me04|JouéClub": 1793722171,
-    "bundle-me04|LaGrandeRécré": 1793722171,
+    "bundle-me04|BCD Jeux": 1793756605,
+    "bundle-me04|E.Leclerc": 1793756605,
+    "bundle-me04|JouéClub": 1793756605,
+    "bundle-me04|LaGrandeRécré": 1793756605,
     "bundle-me05|BCD Jeux": 1793742418,
-    "bundle-me05|E.Leclerc": 1793722171,
+    "bundle-me05|E.Leclerc": 1793756605,
     "bundle-me05|JouéClub": 1793742418,
-    "bundle-me05|LaGrandeRécré": 1793722171,
+    "bundle-me05|LaGrandeRécré": 1793756605,
     "bundle-me06|E.Leclerc": 1793742418,
     "etb-30ans|BCD Jeux": 1793742418,
-    "etb-30ans|E.Leclerc": 1793722171,
+    "etb-30ans|E.Leclerc": 1793756605,
     "etb-30ans|JouéClub": 1793742418,
     "etb-30ans|LaGrandeRécré": 1793742418,
-    "etb-me04|BCD Jeux": 1793722171,
-    "etb-me04|JouéClub": 1793722171,
-    "etb-me05|BCD Jeux": 1793722171,
-    "etb-me05|JouéClub": 1793722171,
-    "etb-me05|LaGrandeRécré": 1793722171,
+    "etb-me04|BCD Jeux": 1793756605,
+    "etb-me04|JouéClub": 1793756605,
+    "etb-me05|BCD Jeux": 1793756605,
+    "etb-me05|JouéClub": 1793756605,
+    "etb-me05|LaGrandeRécré": 1793756605,
     "etb-me06|BCD Jeux": 1793742418,
     "etb-me06|E.Leclerc": 1793742418,
     "etb-me06|LaGrandeRécré": 1793742418
