@@ -2,17 +2,17 @@
   "fiches": {
     "bundle-me04|1001Hobbies": {
       "preuve": "code-barres",
-      "ts": 1794508642,
+      "ts": 1794527552,
       "url": "https://www.1001hobbies.fr/toutes-les-maquettes-avec-1001hobbiesfr"
     },
     "etb-me04|1001Hobbies": {
       "preuve": "code-barres",
-      "ts": 1794508642,
+      "ts": 1794527552,
       "url": "https://www.1001hobbies.fr/toutes-les-maquettes-avec-1001hobbiesfr"
     },
     "etb-me05|1001Hobbies": {
       "preuve": "code-barres",
-      "ts": 1794508642,
+      "ts": 1794527552,
       "url": "https://www.1001hobbies.fr/toutes-les-maquettes-avec-1001hobbiesfr"
     }
   },
@@ -40,24 +40,24 @@
       "ts": 1794480479
     },
     "BCD Jeux": {
-      "diag": "recherche OK (42 liens Pokémon)",
+      "diag": "recherche OK (43 liens Pokémon)",
       "template": "https://www.bcd-jeux.fr/recherche?controller=search&s={q}",
-      "ts": 1793919014
+      "ts": 1794527552
     },
     "E.Leclerc": {
-      "diag": "recherche OK (45 liens Pokémon)",
+      "diag": "recherche OK (44 liens Pokémon)",
       "template": "https://www.e.leclerc/recherche?q={q}",
-      "ts": 1793919014
+      "ts": 1794527552
     },
     "JouéClub": {
-      "diag": "recherche OK (26 liens Pokémon)",
+      "diag": "recherche OK (27 liens Pokémon)",
       "template": "https://www.joueclub.fr/contenu/resultat-de-recherche-produits.html?searchText={q}",
-      "ts": 1793919014
+      "ts": 1794527552
     },
     "LaGrandeRécré": {
       "diag": "recherche OK (5 liens Pokémon)",
       "template": "https://www.lagranderecre.fr/catalogsearch/result/?q={q}",
-      "ts": 1793919014
+      "ts": 1794527552
     },
     "Micromania": {
       "diag": "recherche bloquée (page anti-robot)",
@@ -77,7 +77,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": true,
-      "problems": 25,
+      "problems": 26,
       "status": "out_of_stock"
     },
     "bundle-30ans|E.Leclerc": {
@@ -85,21 +85,21 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "bundle-30ans|JouéClub": {
       "alerted": false,
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "bundle-30ans|LaGrandeRécré": {
       "alerted": false,
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "bundle-30ans|Micromania": {
       "alerted": false,
@@ -163,7 +163,7 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "bundle-me05|E.Leclerc": {
       "alerted": false,
@@ -177,7 +177,7 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "bundle-me05|LaGrandeRécré": {
       "alerted": false,
@@ -212,7 +212,7 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "bundle-me06|JouéClub": {
       "alerted": false,
@@ -247,7 +247,7 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "etb-30ans|E.Leclerc": {
       "alerted": false,
@@ -261,14 +261,14 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "etb-30ans|LaGrandeRécré": {
       "alerted": false,
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "etb-30ans|Micromania": {
       "alerted": false,
@@ -310,7 +310,7 @@
       "alerted": false,
       "price": null,
       "problem_notified": true,
-      "problems": 40,
+      "problems": 41,
       "status": "in_stock"
     },
     "etb-me04|Micromania": {
@@ -375,14 +375,14 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "etb-me06|E.Leclerc": {
       "alerted": false,
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "etb-me06|JouéClub": {
       "alerted": false,
@@ -396,7 +396,7 @@
       "price": null,
       "problem_notified": false,
       "problems": 0,
-      "status": "attente"
+      "status": "absent"
     },
     "etb-me06|Micromania": {
       "alerted": false,
@@ -406,34 +406,34 @@
       "status": "recherche"
     }
   },
-  "recap_ts": 1794480479,
+  "recap_ts": 1794527552,
   "recherches": {
-    "bundle-30ans|E.Leclerc": 1794452218,
-    "bundle-30ans|JouéClub": 1794452218,
-    "bundle-30ans|LaGrandeRécré": 1794452218,
-    "bundle-me04|1001Hobbies": 1794508642,
+    "bundle-30ans|E.Leclerc": 1794527552,
+    "bundle-30ans|JouéClub": 1794527552,
+    "bundle-30ans|LaGrandeRécré": 1794527552,
+    "bundle-me04|1001Hobbies": 1794527552,
     "bundle-me04|BCD Jeux": 1794508642,
     "bundle-me04|E.Leclerc": 1794508642,
     "bundle-me04|JouéClub": 1794508642,
     "bundle-me04|LaGrandeRécré": 1794508642,
-    "bundle-me05|BCD Jeux": 1794452218,
+    "bundle-me05|BCD Jeux": 1794527552,
     "bundle-me05|E.Leclerc": 1794508642,
-    "bundle-me05|JouéClub": 1794452218,
+    "bundle-me05|JouéClub": 1794527552,
     "bundle-me05|LaGrandeRécré": 1794508642,
-    "bundle-me06|E.Leclerc": 1794452218,
-    "etb-30ans|BCD Jeux": 1794452218,
+    "bundle-me06|E.Leclerc": 1794527552,
+    "etb-30ans|BCD Jeux": 1794527552,
     "etb-30ans|E.Leclerc": 1794508642,
-    "etb-30ans|JouéClub": 1794452218,
-    "etb-30ans|LaGrandeRécré": 1794452218,
-    "etb-me04|1001Hobbies": 1794508642,
+    "etb-30ans|JouéClub": 1794527552,
+    "etb-30ans|LaGrandeRécré": 1794527552,
+    "etb-me04|1001Hobbies": 1794527552,
     "etb-me04|BCD Jeux": 1794508642,
     "etb-me04|JouéClub": 1794508642,
-    "etb-me05|1001Hobbies": 1794508642,
+    "etb-me05|1001Hobbies": 1794527552,
     "etb-me05|BCD Jeux": 1794508642,
     "etb-me05|JouéClub": 1794508642,
     "etb-me05|LaGrandeRécré": 1794508642,
-    "etb-me06|BCD Jeux": 1794452218,
-    "etb-me06|E.Leclerc": 1794452218,
-    "etb-me06|LaGrandeRécré": 1794452218
+    "etb-me06|BCD Jeux": 1794527552,
+    "etb-me06|E.Leclerc": 1794527552,
+    "etb-me06|LaGrandeRécré": 1794527552
   }
 }
